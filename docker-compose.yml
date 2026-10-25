@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  db:
+    image: mongo:7.0-jammy
+    container_name: apexlms_mongodb
+    restart: always
+    environment:
+      MONGO_INITDB_DATABASE: ${MONGO_DB_NAME:-apexlms_db}
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD-SHELL", "mongosh --eval 'db.runCommand(\"ping\").ok' localhost:27017/test --quiet"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: apexlms_backend
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      MONGO_URI: mongodb://db:27017/${MONGO_DB_NAME:-apexlms_db}
+      MONGO_DB_NAME: ${MONGO_DB_NAME:-apexlms_db}
+      SECRET_KEY: ${SECRET_KEY:-super-secret-jwt-encryption-key-for-engineering-lms-2026}
+      ACCESS_TOKEN_EXPIRE_MINUTES: 10080
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: apexlms_frontend
+    restart: always
+    depends_on:
+      - backend
+    ports:
+      - "3000:80"
+    environment:
+      - VITE_API_BASE_URL=/api
+
+volumes:
+  mongo_data:

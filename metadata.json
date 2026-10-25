@@ -1,0 +1,6 @@
+{
+  "name": "ApexLMS - Engineering Project Roadmap & Curriculum",
+  "description": "Production-grade Engineering Project Roadmap Learning Management System for 1st, 2nd, and 3rd year engineering students with Full-Stack and AI Engineering tracks, interactive progress tracking, resource repository, and mentor project reviews.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
