@@ -1,4 +1,5 @@
 import fs from 'fs';
+import mongoose from 'mongoose';
 import path from 'path';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
@@ -40,6 +41,9 @@ export interface DatabaseSchema {
 
 class DBStore {
   private db: DatabaseSchema;
+  private mongoConnected: boolean = false;
+  private isSavingToMongo: boolean = false;
+  private pendingMongoSave: boolean = false;
 
   constructor() {
     this.db = this.init();
@@ -119,11 +123,106 @@ class DBStore {
     });
   }
 
+  public async initMongo(uri?: string): Promise<void> {
+    const mongoUri = uri || process.env.MONGO_URI;
+    if (!mongoUri) {
+      console.log('📦 No MONGO_URI provided. Using local JSON store (data/db.json).');
+      return;
+    }
+
+    try {
+      console.log('🔄 Connecting to MongoDB Atlas...');
+      await mongoose.connect(mongoUri, {
+        serverSelectionTimeoutMS: 8000,
+      });
+      this.mongoConnected = true;
+      console.log('✅ Connected to MongoDB Atlas successfully!');
+
+      const db = mongoose.connection.db;
+      if (db) {
+        const collection = db.collection('lms_data');
+        const stateDoc = await collection.findOne({ _id: 'master_state' as any });
+
+        if (stateDoc && (stateDoc as any).data) {
+          console.log('📥 Restored LMS state from MongoDB Atlas.');
+          this.db = (stateDoc as any).data as DatabaseSchema;
+          this.syncProjectTopicProgress();
+          try {
+            fs.writeFileSync(DB_FILE, JSON.stringify(this.db, null, 2), 'utf-8');
+          } catch {}
+        } else {
+          console.log('🌱 Initializing new MongoDB Atlas cluster with seed curriculum & accounts...');
+          await this.saveToMongo();
+        }
+      }
+    } catch (err: any) {
+      console.warn('⚠️ MongoDB Atlas connection notice:', err.message);
+      console.log('📁 Using local file database (data/db.json).');
+      this.mongoConnected = false;
+    }
+  }
+
+  public isMongoConnected(): boolean {
+    return this.mongoConnected;
+  }
+
+  private async saveToMongo(): Promise<void> {
+    if (!this.mongoConnected) return;
+    if (this.isSavingToMongo) {
+      this.pendingMongoSave = true;
+      return;
+    }
+
+    this.isSavingToMongo = true;
+    try {
+      const db = mongoose.connection.db;
+      if (db) {
+        const collection = db.collection('lms_data');
+        await collection.replaceOne(
+          { _id: 'master_state' as any },
+          { _id: 'master_state', data: this.db, updated_at: new Date().toISOString() } as any,
+          { upsert: true }
+        );
+
+        const usersCol = db.collection('users');
+        for (const u of this.db.users) {
+          await usersCol.replaceOne({ id: u.id } as any, u as any, { upsert: true });
+        }
+        const profCol = db.collection('profiles');
+        for (const p of this.db.profiles) {
+          await profCol.replaceOne({ id: p.id } as any, p as any, { upsert: true });
+        }
+        const projCol = db.collection('projects');
+        for (const pr of this.db.projects) {
+          await projCol.replaceOne({ id: pr.id } as any, pr as any, { upsert: true });
+        }
+        const progCol = db.collection('topic_progress');
+        for (const tp of this.db.topicProgress) {
+          await progCol.replaceOne({ id: tp.id } as any, tp as any, { upsert: true });
+        }
+      }
+    } catch (err: any) {
+      console.error('Failed to sync to MongoDB Atlas:', err.message);
+    } finally {
+      this.isSavingToMongo = false;
+      if (this.pendingMongoSave) {
+        this.pendingMongoSave = false;
+        this.saveToMongo();
+      }
+    }
+  }
+
   private saveToDisk(data: DatabaseSchema = this.db): void {
     try {
       fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2), 'utf-8');
     } catch (err) {
       console.error('Error writing to db.json:', err);
+    }
+
+    if (this.mongoConnected) {
+      this.saveToMongo().catch((err) => {
+        console.error('Error in MongoDB background sync:', err);
+      });
     }
   }
 

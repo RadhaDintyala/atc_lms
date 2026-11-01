@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import path from 'path';
@@ -593,6 +594,7 @@ app.get('/api/health', (req: Request, res: Response) => {
     status: 'ok',
     version: '1.0.0',
     service: 'Beacon Engineering Platform API',
+    database: dbStore.isMongoConnected() ? 'mongodb_atlas' : 'local_json',
     uptime: process.uptime(),
   });
 });
@@ -601,6 +603,9 @@ app.get('/api/health', (req: Request, res: Response) => {
 // In production on Render, the frontend is on Vercel — we only serve the API.
 // In local dev, we proxy through Vite's dev server for HMR.
 async function startServer() {
+  // Initialize Database connection (MongoDB Atlas if MONGO_URI is set, else local JSON)
+  await dbStore.initMongo();
+
   if (!isProduction) {
     const { createServer: createViteServer } = await import('vite');
     const vite = await createViteServer({
@@ -612,6 +617,7 @@ async function startServer() {
 
   app.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 Beacon API running on http://0.0.0.0:${PORT}`);
+    console.log(`   Database: ${dbStore.isMongoConnected() ? 'MongoDB Atlas (Connected 🟢)' : 'Local File db.json (Active 📁)'}`);
     if (isProduction) {
       console.log(`   Mode: API-only (frontend served by Vercel)`);
     } else {
