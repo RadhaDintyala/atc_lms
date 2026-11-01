@@ -1,4 +1,5 @@
 import express, { Request, Response, NextFunction } from 'express';
+import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { dbStore } from './server/dbStore.ts';
@@ -8,6 +9,31 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
+const isProduction = process.env.NODE_ENV === 'production';
+
+// ======================== CORS ========================
+// In production the frontend lives on a different origin (Vercel).
+// FRONTEND_URL must be set in Render env vars to your Vercel URL.
+// In dev mode we allow localhost:5173 (Vite default) and localhost:3000.
+const allowedOrigins = isProduction
+  ? (process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : ['*'])
+  : ['http://localhost:3000', 'http://localhost:5173', 'http://127.0.0.1:5173'];
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // Allow requests with no origin (curl, Postman, server-to-server)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes('*') || allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      callback(new Error(`CORS: origin ${origin} not allowed`));
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  })
+);
 
 app.use(express.json());
 
@@ -561,7 +587,7 @@ app.get('/api/reports/progress-csv', requireAdmin, (req: Request, res: Response)
   }
 });
 
-// 7. OpenAPI / Health info
+// 7. Health check
 app.get('/api/health', (req: Request, res: Response) => {
   res.json({
     status: 'ok',
@@ -571,10 +597,10 @@ app.get('/api/health', (req: Request, res: Response) => {
   });
 });
 
-// ======================== VITE DEV / PRODUCTION INTEGRATION ========================
-async function setupVite() {
-  const isProduction = process.env.NODE_ENV === 'production';
-
+// ======================== FRONTEND SERVING (dev only) ========================
+// In production on Render, the frontend is on Vercel — we only serve the API.
+// In local dev, we proxy through Vite's dev server for HMR.
+async function startServer() {
   if (!isProduction) {
     const { createServer: createViteServer } = await import('vite');
     const vite = await createViteServer({
@@ -582,20 +608,19 @@ async function setupVite() {
       appType: 'spa',
     });
     app.use(vite.middlewares);
-  } else {
-    const distPath = path.resolve(__dirname, 'dist');
-    app.use(express.static(distPath));
-    app.get('*', (req: Request, res: Response) => {
-      res.sendFile(path.resolve(distPath, 'index.html'));
-    });
   }
 
   app.listen(PORT, '0.0.0.0', () => {
-    console.log(`🚀 Beacon Server running on http://0.0.0.0:${PORT}`);
+    console.log(`🚀 Beacon API running on http://0.0.0.0:${PORT}`);
+    if (isProduction) {
+      console.log(`   Mode: API-only (frontend served by Vercel)`);
+    } else {
+      console.log(`   Mode: dev (Vite HMR active)`);
+    }
   });
 }
 
-setupVite().catch((err) => {
+startServer().catch((err) => {
   console.error('Fatal server startup error:', err);
   process.exit(1);
 });

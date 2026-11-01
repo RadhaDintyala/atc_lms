@@ -19,8 +19,10 @@ import { generateSeedData } from './seedData.ts';
 import { PROJECT_CATALOG } from '../src/data/projectCatalog.js';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'beacon-engineering-lms-jwt-secret-key-2026';
-const DATA_DIR = path.resolve(process.cwd(), 'data');
-const DB_FILE = path.resolve(DATA_DIR, 'db.json');
+const DATA_DIR = process.env.DB_PATH
+  ? path.dirname(process.env.DB_PATH)
+  : path.resolve(process.cwd(), 'data');
+const DB_FILE = process.env.DB_PATH || path.resolve(DATA_DIR, 'db.json');
 
 export interface DatabaseSchema {
   users: User[];

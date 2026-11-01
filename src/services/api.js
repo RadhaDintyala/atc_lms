@@ -1,9 +1,15 @@
 /**
- * API Service for Beacon
- * Handles JWT authentication, request headers, and standardized error envelopes.
+ * API Service for Beacon LMS
+ * Handles JWT authentication, request headers, and standardised error envelopes.
+ *
+ * In production (Vercel → Render split deployment):
+ *   Set VITE_API_BASE_URL=https://your-backend.onrender.com/api in Vercel env vars.
+ *
+ * In local development:
+ *   Leave VITE_API_BASE_URL unset — the Vite dev server proxies /api → localhost:3000.
  */
 
-const BASE_URL = '/api';
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
 
 function getToken() {
   return localStorage.getItem('beacon_token') || localStorage.getItem('apexlms_token');

@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: atc-lms-api
+    runtime: node
+    buildCommand: npm install --legacy-peer-deps
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: "20"
+      - key: JWT_SECRET
+        generateValue: true        # Render auto-generates a secret on first deploy
+      - key: FRONTEND_URL
+        sync: false                # Set this manually to your Vercel URL after deploying frontend
+      # Uncomment and set if you use the Render Disk for persistence:
+      # - key: DB_PATH
+      #   value: /data/db.json
+    # Uncomment to add a persistent disk (prevents db.json from resetting on redeploy):
+    # disk:
+    #   name: atc-lms-data
+    #   mountPath: /data
+    #   sizeGB: 1
+
