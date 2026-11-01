@@ -16,8 +16,9 @@ import {
   ActivityLog,
 } from './types.ts';
 import { generateSeedData } from './seedData.ts';
+import { PROJECT_CATALOG } from '../src/data/projectCatalog.js';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'apex-engineering-lms-jwt-secret-key-2026';
+const JWT_SECRET = process.env.JWT_SECRET || 'beacon-engineering-lms-jwt-secret-key-2026';
 const DATA_DIR = path.resolve(process.cwd(), 'data');
 const DB_FILE = path.resolve(DATA_DIR, 'db.json');
 
@@ -50,15 +51,70 @@ class DBStore {
     if (fs.existsSync(DB_FILE)) {
       try {
         const raw = fs.readFileSync(DB_FILE, 'utf-8');
-        return JSON.parse(raw);
+        const parsed = JSON.parse(raw);
+        this.db = parsed;
+        this.syncProjectTopicProgress();
+        return this.db;
       } catch (err) {
         console.error('Failed to read db.json, generating fresh seed data:', err);
       }
     }
 
     const initialData = generateSeedData();
-    this.saveToDisk(initialData);
-    return initialData;
+    this.db = initialData;
+    this.syncProjectTopicProgress();
+    this.saveToDisk(this.db);
+    return this.db;
+  }
+
+  private syncProjectTopicProgress(): void {
+    if (!this.db?.projects || !this.db?.topicProgress) return;
+    this.db.projects.forEach((proj) => {
+      if (
+        proj.topic_id &&
+        (proj.status === 'approved' || proj.status === 'submitted' || proj.status === 'under_review') &&
+        proj.github_url &&
+        proj.github_url.trim().length > 0
+      ) {
+        const cur = this.db.topicProgress.find(
+          (tp) => tp.student_id === proj.student_id && tp.topic_id === proj.topic_id
+        );
+        if (!cur) {
+          this.db.topicProgress.push({
+            id: `prog-${proj.student_id}-${proj.topic_id}`,
+            student_id: proj.student_id,
+            topic_id: proj.topic_id,
+            status: 'completed',
+            completed_at: proj.submitted_at || new Date().toISOString(),
+            notes: 'Completed automatically via project GitHub submission',
+            updated_at: new Date().toISOString(),
+          });
+        } else if (cur.status !== 'completed') {
+          cur.status = 'completed';
+          cur.completed_at = cur.completed_at || proj.submitted_at || new Date().toISOString();
+        }
+      }
+    });
+
+    // Ensure curriculum topics requiring projects from PROJECT_CATALOG only stay completed if GitHub URL is submitted
+    const projectTopicIds = new Set(PROJECT_CATALOG.map((p: any) => p.topic_id));
+    this.db.topicProgress.forEach((tp) => {
+      if (projectTopicIds.has(tp.topic_id) && tp.status === 'completed') {
+        const hasValidSubmission = this.db.projects.some(
+          (p) =>
+            p.student_id === tp.student_id &&
+            p.topic_id === tp.topic_id &&
+            (p.status === 'approved' || p.status === 'submitted' || p.status === 'under_review') &&
+            p.github_url &&
+            p.github_url.trim().length > 0
+        );
+        if (!hasValidSubmission) {
+          tp.status = 'in_progress';
+          tp.completed_at = undefined;
+          tp.notes = 'Requires project GitHub submission to complete';
+        }
+      }
+    });
   }
 
   private saveToDisk(data: DatabaseSchema = this.db): void {
@@ -206,7 +262,7 @@ class DBStore {
       id: profileId,
       user_id: userId,
       roll_number: data.roll_number.trim(),
-      college: data.college.trim() || 'Apex Institute of Technology',
+      college: data.college.trim() || 'Beacon Institute of Technology',
       department: data.department.trim(),
       current_year: data.current_year,
       track_id: data.track_id,
@@ -227,7 +283,48 @@ class DBStore {
     });
 
     this.saveToDisk();
-    return { user: newUser, profile: newProfile };
+
+    const token = jwt.sign(
+      { userId: newUser.id, email: newUser.email, role: 'student', profileId: newProfile.id },
+      JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    return { token, user: newUser, profile: newProfile };
+  }
+
+  public createAdmin(data: {
+    full_name: string;
+    email: string;
+    passwordPlain: string;
+  }) {
+    if (this.db.users.some((u) => u.email.toLowerCase() === data.email.toLowerCase())) {
+      throw new Error(`Email ${data.email} is already registered.`);
+    }
+
+    const userId = `usr-admin-${Date.now()}`;
+    const now = new Date().toISOString();
+
+    const newAdmin: User = {
+      id: userId,
+      email: data.email.trim(),
+      password_hash: bcrypt.hashSync(data.passwordPlain, 10),
+      role: 'admin',
+      full_name: data.full_name.trim(),
+      created_at: now,
+      status: 'active',
+    };
+
+    this.db.users.push(newAdmin);
+    this.saveToDisk();
+
+    const token = jwt.sign(
+      { userId: newAdmin.id, email: newAdmin.email, role: 'admin' },
+      JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    return { token, user: newAdmin };
   }
 
   public updateStudentProfile(
@@ -448,15 +545,69 @@ class DBStore {
         completedRequiredTopics: 0,
         inProgressTopics: 0,
         pendingTopics: 0,
+        totalProjects: 0,
+        completedProjects: 0,
         breakdown: {
           commonFoundationPercentage: 0,
           trackPercentage: 0,
           thirdYearPercentage: 0,
+          commonProjectsTotal: 0,
+          commonProjectsCompleted: 0,
+          trackProjectsTotal: 0,
+          trackProjectsCompleted: 0,
+          isCommonCompleted: false,
+          isTrackCompleted: false,
         },
         nextRecommendedTopic: null,
       };
     }
 
+    // Projects submitted by this student containing a valid GitHub URL
+    const studentSubmittedProjects = this.db.projects.filter(
+      (p) =>
+        p.student_id === profileId &&
+        (p.status === 'submitted' || p.status === 'approved' || p.status === 'under_review') &&
+        p.github_url &&
+        p.github_url.trim().length > 0
+    );
+    const submittedTopicIds = new Set(studentSubmittedProjects.map((p) => p.topic_id).filter(Boolean));
+
+    // Curriculum project catalogs by track
+    const commonProjectSpecs = PROJECT_CATALOG.filter((p: any) => p.track_id === 'common');
+    const commonProjectsTotal = commonProjectSpecs.length; // 5 projects
+    const commonProjectsCompleted = commonProjectSpecs.filter((p: any) => submittedTopicIds.has(p.topic_id)).length;
+    const isCommonCompleted = commonProjectsTotal > 0 && commonProjectsCompleted >= commonProjectsTotal;
+    const commonPercentage = commonProjectsTotal > 0
+      ? Number(((commonProjectsCompleted / commonProjectsTotal) * 100).toFixed(1))
+      : 100;
+
+    const trackProjectSpecs = PROJECT_CATALOG.filter((p: any) => p.track_id === profile.track_id);
+    const trackProjectsTotal = trackProjectSpecs.length; // 4 projects for fullstack
+    const trackProjectsCompleted = trackProjectSpecs.filter((p: any) => submittedTopicIds.has(p.topic_id)).length;
+    const isTrackCompleted = trackProjectsTotal > 0 && trackProjectsCompleted >= trackProjectsTotal;
+    const trackPercentage = trackProjectsTotal > 0
+      ? Number(((trackProjectsCompleted / trackProjectsTotal) * 100).toFixed(1))
+      : 100;
+
+    // Year 3 Capstone
+    const thirdYearProjectSpecs = PROJECT_CATALOG.filter((p: any) => p.year_id === 'year_3');
+    const thirdYearTotal = thirdYearProjectSpecs.length;
+    const thirdYearCompleted = thirdYearProjectSpecs.filter((p: any) => submittedTopicIds.has(p.topic_id)).length;
+    const thirdYearPercentage = thirdYearTotal > 0
+      ? Number(((thirdYearCompleted / thirdYearTotal) * 100).toFixed(1))
+      : 0;
+
+    // Overall applicable projects and completion
+    const applicableProjectSpecs = PROJECT_CATALOG.filter(
+      (p: any) => p.track_id === 'common' || p.track_id === profile.track_id
+    );
+    const applicableProjectsTotal = applicableProjectSpecs.length;
+    const applicableProjectsCompleted = applicableProjectSpecs.filter((p: any) => submittedTopicIds.has(p.topic_id)).length;
+    const overallPercentage = applicableProjectsTotal > 0
+      ? Number(((applicableProjectsCompleted / applicableProjectsTotal) * 100).toFixed(1))
+      : 0;
+
+    // Topics list and counts
     const applicableTopics = this.getApplicableTopicsForStudent(profileId);
     const requiredTopics = applicableTopics.filter((t) => t.is_required);
     const progressRecords = this.db.topicProgress.filter((tp) => tp.student_id === profileId);
@@ -480,32 +631,6 @@ class DBStore {
     });
 
     const pendingCount = Math.max(0, requiredTopics.length - completedRequiredCount - inProgressCount);
-    const overallPercentage = requiredTopics.length > 0
-      ? Number(((completedRequiredCount / requiredTopics.length) * 100).toFixed(1))
-      : 0;
-
-    // Breakdown: Common Foundation
-    const commonTopics = requiredTopics.filter((t) => t.year_id === 'year_1');
-    const commonCompleted = commonTopics.filter((t) => completedTopicIds.has(t.id)).length;
-    const commonPercentage = commonTopics.length > 0
-      ? Number(((commonCompleted / commonTopics.length) * 100).toFixed(1))
-      : 0;
-
-    // Breakdown: Track Specialization (Year 2)
-    const trackTopics = requiredTopics.filter((t) => t.year_id === 'year_2' && t.track_id === profile.track_id);
-    const trackCompleted = trackTopics.filter((t) => completedTopicIds.has(t.id)).length;
-    const trackPercentage = trackTopics.length > 0
-      ? Number(((trackCompleted / trackTopics.length) * 100).toFixed(1))
-      : 0;
-
-    // Breakdown: 3rd Year Advanced
-    const thirdYearTopics = requiredTopics.filter((t) => t.year_id === 'year_3');
-    const thirdYearCompleted = thirdYearTopics.filter((t) => completedTopicIds.has(t.id)).length;
-    const thirdYearPercentage = thirdYearTopics.length > 0
-      ? Number(((thirdYearCompleted / thirdYearTopics.length) * 100).toFixed(1))
-      : 0;
-
-    // Next recommended topic: first topic that is in_progress or not_started
     const nextTopic = applicableTopics.find((t) => !completedTopicIds.has(t.id)) || null;
 
     return {
@@ -514,10 +639,18 @@ class DBStore {
       completedRequiredTopics: completedRequiredCount,
       inProgressTopics: inProgressCount,
       pendingTopics: pendingCount,
+      totalProjects: applicableProjectsTotal,
+      completedProjects: applicableProjectsCompleted,
       breakdown: {
         commonFoundationPercentage: commonPercentage,
         trackPercentage,
         thirdYearPercentage,
+        commonProjectsTotal,
+        commonProjectsCompleted,
+        trackProjectsTotal,
+        trackProjectsCompleted,
+        isCommonCompleted,
+        isTrackCompleted,
       },
       nextRecommendedTopic: nextTopic,
     };
@@ -533,6 +666,23 @@ class DBStore {
     if (!profile) throw new Error('Student profile not found');
     const topic = this.db.topics.find((t) => t.id === topicId);
     if (!topic) throw new Error('Topic not found');
+
+    if (status === 'completed') {
+      const projectSpec = PROJECT_CATALOG.find((p: any) => p.topic_id === topicId);
+      if (projectSpec) {
+        const hasProject = this.db.projects.some(
+          (p) =>
+            p.student_id === profileId &&
+            p.topic_id === topicId &&
+            (p.status === 'submitted' || p.status === 'approved' || p.status === 'under_review') &&
+            p.github_url &&
+            p.github_url.trim().length > 0
+        );
+        if (!hasProject) {
+          throw new Error(`Completing "${topic.title}" requires submitting your project with a valid GitHub repository URL in the Projects section.`);
+        }
+      }
+    }
 
     const now = new Date().toISOString();
     let record = this.db.topicProgress.find((tp) => tp.student_id === profileId && tp.topic_id === topicId);
@@ -683,6 +833,10 @@ class DBStore {
       deployment_url: string;
       description: string;
       completion_notes?: string;
+      architecture_notes?: string;
+      demo_video_url?: string;
+      testing_notes?: string;
+      documentation_url?: string;
       status: 'draft' | 'submitted';
     }
   ) {
@@ -691,6 +845,10 @@ class DBStore {
     const user = this.db.users.find((u) => u.id === profile.user_id);
 
     const now = new Date().toISOString();
+
+    if (data.status === 'submitted' && (!data.github_url || !data.github_url.trim())) {
+      throw new Error('A valid GitHub repository URL is required to submit your project.');
+    }
 
     if (data.id) {
       const existing = this.db.projects.find((p) => p.id === data.id);
@@ -705,6 +863,10 @@ class DBStore {
       existing.deployment_url = data.deployment_url;
       existing.description = data.description;
       if (data.completion_notes !== undefined) existing.completion_notes = data.completion_notes;
+      if (data.architecture_notes !== undefined) existing.architecture_notes = data.architecture_notes;
+      if (data.demo_video_url !== undefined) existing.demo_video_url = data.demo_video_url;
+      if (data.testing_notes !== undefined) existing.testing_notes = data.testing_notes;
+      if (data.documentation_url !== undefined) existing.documentation_url = data.documentation_url;
       if (data.topic_id !== undefined) existing.topic_id = data.topic_id;
 
       if (data.status === 'submitted' && existing.status !== 'submitted') {
@@ -727,6 +889,20 @@ class DBStore {
       }
 
       profile.last_active_at = now;
+
+      // Automatically update topic progress based on project status
+      const topicIdToUpdate = existing.topic_id;
+      if (topicIdToUpdate) {
+        if (existing.status === 'submitted') {
+          this.updateTopicStatus(profileId, topicIdToUpdate, 'completed', 'Completed automatically via project submission');
+        } else if (existing.status === 'draft') {
+          const cur = this.db.topicProgress.find((tp) => tp.student_id === profileId && tp.topic_id === topicIdToUpdate);
+          if (!cur || cur.status === 'not_started') {
+            this.updateTopicStatus(profileId, topicIdToUpdate, 'in_progress', 'Started project draft');
+          }
+        }
+      }
+
       this.saveToDisk();
       return existing;
     }
@@ -744,6 +920,10 @@ class DBStore {
       deployment_url: data.deployment_url,
       description: data.description,
       completion_notes: data.completion_notes,
+      architecture_notes: data.architecture_notes,
+      demo_video_url: data.demo_video_url,
+      testing_notes: data.testing_notes,
+      documentation_url: data.documentation_url,
       status: data.status,
       created_at: now,
       submitted_at: data.status === 'submitted' ? now : undefined,
@@ -768,6 +948,18 @@ class DBStore {
         description: `Submitted project "${data.title}" for review.`,
         timestamp: now,
       });
+    }
+
+    // Automatically update topic progress based on project status
+    if (newProj.topic_id) {
+      if (newProj.status === 'submitted') {
+        this.updateTopicStatus(profileId, newProj.topic_id, 'completed', 'Completed automatically via project submission');
+      } else if (newProj.status === 'draft') {
+        const cur = this.db.topicProgress.find((tp) => tp.student_id === profileId && tp.topic_id === newProj.topic_id);
+        if (!cur || cur.status === 'not_started') {
+          this.updateTopicStatus(profileId, newProj.topic_id, 'in_progress', 'Started project draft');
+        }
+      }
     }
 
     this.saveToDisk();
@@ -806,6 +998,15 @@ class DBStore {
       description: `Project "${project.title}" review status: ${status.replace('_', ' ')}.`,
       timestamp: now,
     });
+
+    // Automatically mark topic as completed on approval or in_progress on changes_requested
+    if (project.topic_id) {
+      if (status === 'approved') {
+        this.updateTopicStatus(project.student_id, project.topic_id, 'completed', 'Completed automatically upon mentor approval');
+      } else if (status === 'changes_requested') {
+        this.updateTopicStatus(project.student_id, project.topic_id, 'in_progress', 'Project changes requested by mentor');
+      }
+    }
 
     this.saveToDisk();
     return project;

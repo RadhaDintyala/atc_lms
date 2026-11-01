@@ -81,7 +81,7 @@ class StudentProfile(Base):
     id = Column(String, primary_key=True, index=True)
     user_id = Column(String, ForeignKey("users.id", ondelete="CASCADE"), unique=True, nullable=False)
     roll_number = Column(String, unique=True, index=True, nullable=False)
-    college = Column(String, nullable=False, default="Apex Institute of Technology")
+    college = Column(String, nullable=False, default="Beacon Institute of Technology")
     department = Column(String, nullable=False)
     current_year = Column(Enum(EngineeringYear), default=EngineeringYear.YEAR_1, nullable=False)
     track_id = Column(Enum(SpecializationTrack), default=SpecializationTrack.COMMON, nullable=False)

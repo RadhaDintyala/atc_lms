@@ -81,6 +81,85 @@ app.get('/api/auth/me', requireAuth, (req: AuthRequest, res: Response) => {
   res.json({ user: safeUser, profile });
 });
 
+// Signup Route (Supports both Student & Admin)
+app.post('/api/auth/signup', (req: Request, res: Response) => {
+  try {
+    const { role, full_name, email, password, year, track_id, college, department, roll_number } = req.body;
+    if (!email || !password || !full_name) {
+      res.status(400).json({ error: 'Full name, email, and password are required' });
+      return;
+    }
+
+    if (role === 'admin') {
+      const result = dbStore.createAdmin({
+        full_name,
+        email,
+        passwordPlain: password,
+      });
+      const { password_hash, ...safeUser } = result.user;
+      res.status(201).json({ token: result.token, user: safeUser });
+      return;
+    }
+
+    // Default to student
+    const studentYear = year || 'year_1';
+    const studentTrack = track_id || (studentYear === 'year_1' ? 'common' : 'fullstack');
+    const studentRoll = roll_number || `ENG${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
+
+    const result = dbStore.createStudent({
+      full_name,
+      email,
+      passwordPlain: password,
+      roll_number: studentRoll,
+      college: college || 'Beacon Institute of Technology',
+      department: department || 'Computer Science & Engineering',
+      current_year: studentYear,
+      track_id: studentTrack,
+    });
+
+    const { password_hash, ...safeUser } = result.user;
+    res.status(201).json({ token: result.token, user: safeUser, profile: result.profile });
+  } catch (err: any) {
+    res.status(400).json({ error: err.message || 'Registration failed' });
+  }
+});
+
+// Update Year of Study for Student
+app.put('/api/auth/me/year', requireAuth, (req: AuthRequest, res: Response) => {
+  try {
+    const profileId = req.user?.profileId;
+    if (!profileId) {
+      res.status(403).json({ error: 'Only student accounts can update year of study' });
+      return;
+    }
+    const { year, track_id } = req.body;
+    if (!year || !['year_1', 'year_2', 'year_3'].includes(year)) {
+      res.status(400).json({ error: 'Valid year is required (year_1, year_2, year_3)' });
+      return;
+    }
+
+    let targetTrack = track_id;
+    if (!targetTrack) {
+      targetTrack = year === 'year_1' ? 'common' : 'fullstack';
+    }
+
+    const currentProfile = dbStore.getProfileById(profileId);
+    if (!currentProfile) {
+      res.status(404).json({ error: 'Student profile not found' });
+      return;
+    }
+
+    const updated = dbStore.updateStudentProfile(profileId, {
+      current_year: year,
+      track_id: targetTrack,
+    });
+
+    res.json(updated);
+  } catch (err: any) {
+    res.status(400).json({ error: err.message || 'Failed to update year' });
+  }
+});
+
 // 2. Student Management (Admin & Self)
 app.get('/api/students', requireAdmin, (req: Request, res: Response) => {
   try {
@@ -103,7 +182,7 @@ app.post('/api/students', requireAdmin, (req: Request, res: Response) => {
       email,
       passwordPlain: password,
       roll_number,
-      college: college || 'Apex Institute of Technology',
+      college: college || 'Beacon Institute of Technology',
       department: department || 'Engineering',
       current_year,
       track_id,
@@ -396,7 +475,22 @@ app.post('/api/projects', requireAuth, (req: AuthRequest, res: Response) => {
     return;
   }
 
-  const { id, topic_id, title, problem_statement, tech_stack, github_url, deployment_url, description, completion_notes, status } = req.body;
+  const {
+    id,
+    topic_id,
+    title,
+    problem_statement,
+    tech_stack,
+    github_url,
+    deployment_url,
+    description,
+    completion_notes,
+    architecture_notes,
+    demo_video_url,
+    testing_notes,
+    documentation_url,
+    status,
+  } = req.body;
 
   if (!title || !problem_statement || !description) {
     res.status(400).json({ error: 'Title, problem statement, and description are required' });
@@ -414,6 +508,10 @@ app.post('/api/projects', requireAuth, (req: AuthRequest, res: Response) => {
       deployment_url: deployment_url || '',
       description,
       completion_notes,
+      architecture_notes,
+      demo_video_url,
+      testing_notes,
+      documentation_url,
       status: status === 'submitted' ? 'submitted' : 'draft',
     });
     res.status(201).json(saved);
@@ -468,7 +566,7 @@ app.get('/api/health', (req: Request, res: Response) => {
   res.json({
     status: 'ok',
     version: '1.0.0',
-    service: 'ApexLMS Engineering Platform API',
+    service: 'Beacon Engineering Platform API',
     uptime: process.uptime(),
   });
 });
@@ -493,7 +591,7 @@ async function setupVite() {
   }
 
   app.listen(PORT, '0.0.0.0', () => {
-    console.log(`🚀 ApexLMS Server running on http://0.0.0.0:${PORT}`);
+    console.log(`🚀 Beacon Server running on http://0.0.0.0:${PORT}`);
   });
 }
 

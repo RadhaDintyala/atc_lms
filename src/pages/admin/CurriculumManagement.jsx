@@ -10,7 +10,6 @@ import {
   Edit2,
   Trash2,
   BookOpen,
-  Sparkles,
   FolderPlus,
   Clock,
   CheckCircle2,
@@ -187,8 +186,8 @@ export default function CurriculumManagement() {
     return (
       <div className="p-8 flex items-center justify-center min-h-[400px]">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 border-3 border-amber-400 border-t-transparent rounded-full animate-spin"></div>
-          <p className="text-sm text-slate-500 font-medium">Loading curriculum specifications...</p>
+          <div className="w-8 h-8 border-3 border-[#F9C321] border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-sm text-[#71717A] font-medium">Loading curriculum specifications...</p>
         </div>
       </div>
     );
@@ -210,12 +209,12 @@ export default function CurriculumManagement() {
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#E4E4E7]">
         <div>
-          <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">
+          <h1 className="text-2xl font-black text-[#111111] tracking-tight">
             Curriculum Architecture & Topics
           </h1>
-          <p className="text-xs sm:text-sm text-slate-500 mt-1">
+          <p className="text-xs sm:text-sm text-[#71717A] mt-1 font-normal">
             Configure learning paths across 1st Year Common Foundation, 2nd Year Tracks, and 3rd Year Capstone.
           </p>
         </div>
@@ -233,32 +232,32 @@ export default function CurriculumManagement() {
               setEditingCat(null);
               setIsCatModalOpen(true);
             }}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold shadow-2xs"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg border border-[#E4E4E7] bg-white hover:bg-[#F4F4F5] text-[#111111] text-xs font-bold transition-all shadow-2xs"
           >
-            <FolderPlus className="w-4 h-4 text-slate-500" />
+            <FolderPlus className="w-4 h-4 text-[#71717A]" />
             <span>+ Add Category</span>
           </button>
           <button
             onClick={handleOpenNewTopic}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-amber-300 text-xs font-bold transition-all shadow-xs"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#F9C321] hover:bg-[#E5B21D] text-[#111111] text-xs font-bold transition-all shadow-xs"
           >
-            <Plus className="w-4 h-4" />
+            <Plus className="w-4 h-4 text-[#111111]" />
             <span>+ Create Topic</span>
           </button>
         </div>
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs space-y-3">
+      <div className="bg-white p-4 rounded-xl border border-[#E4E4E7] shadow-2xs space-y-3">
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div className="relative">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+            <Search className="w-4 h-4 text-[#A1A1AA] absolute left-3 top-3" />
             <input
               type="text"
               placeholder="Search topics, competencies, descriptions..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-hidden focus:border-amber-400"
+              className="w-full pl-9 pr-3 py-2 text-xs rounded-lg border border-[#E4E4E7] focus:outline-hidden focus:border-[#111111] focus:ring-1 focus:ring-[#111111] text-[#111111] bg-white transition-all"
             />
           </div>
 
@@ -266,7 +265,7 @@ export default function CurriculumManagement() {
             <select
               value={yearFilter}
               onChange={(e) => setYearFilter(e.target.value)}
-              className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-hidden focus:border-amber-400 bg-white"
+              className="w-full px-3 py-2 text-xs rounded-lg border border-[#E4E4E7] focus:outline-hidden focus:border-[#111111] focus:ring-1 focus:ring-[#111111] bg-white text-[#111111] transition-all font-medium"
             >
               <option value="all">All Engineering Years</option>
               <option value="year_1">1st Year (Common Foundation)</option>
@@ -279,7 +278,7 @@ export default function CurriculumManagement() {
             <select
               value={trackFilter}
               onChange={(e) => setTrackFilter(e.target.value)}
-              className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-hidden focus:border-amber-400 bg-white"
+              className="w-full px-3 py-2 text-xs rounded-lg border border-[#E4E4E7] focus:outline-hidden focus:border-[#111111] focus:ring-1 focus:ring-[#111111] bg-white text-[#111111] transition-all font-medium"
             >
               <option value="all">All Specialization Tracks</option>
               <option value="common">Common Foundation</option>
@@ -289,9 +288,9 @@ export default function CurriculumManagement() {
           </div>
         </div>
 
-        <div className="flex items-center justify-between pt-2 border-t border-slate-100 text-xs">
-          <span className="text-slate-500">
-            Total Topics in catalog: <span className="font-bold text-slate-800">{filteredTopics.length}</span>
+        <div className="flex items-center justify-between pt-2 border-t border-[#F4F4F5] text-xs">
+          <span className="text-[#71717A]">
+            Total Topics in catalog: <span className="font-bold text-[#111111]">{filteredTopics.length}</span>
           </span>
           {(searchQuery || yearFilter !== 'all' || trackFilter !== 'all') && (
             <button
@@ -300,7 +299,7 @@ export default function CurriculumManagement() {
                 setYearFilter('all');
                 setTrackFilter('all');
               }}
-              className="text-amber-700 font-semibold hover:underline"
+              className="text-[#111111] font-bold underline hover:text-[#71717A] transition-colors"
             >
               Reset Filters
             </button>
@@ -309,10 +308,10 @@ export default function CurriculumManagement() {
       </div>
 
       {/* Topics Roster Table */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+      <div className="bg-white rounded-xl border border-[#E4E4E7] shadow-2xs overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-semibold uppercase tracking-wider">
+            <thead className="bg-[#FAFAFA] border-b border-[#E4E4E7] text-[#71717A] text-[11px] font-bold uppercase tracking-wider">
               <tr>
                 <th className="px-5 py-3.5">Topic & Objectives</th>
                 <th className="px-4 py-3.5">Target Year & Track</th>
@@ -321,10 +320,10 @@ export default function CurriculumManagement() {
                 <th className="px-5 py-3.5 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-[#F4F4F5]">
               {filteredTopics.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-5 py-8 text-center text-slate-400">
+                  <td colSpan={5} className="px-5 py-8 text-center text-[#71717A]">
                     No curriculum topics found matching criteria.
                   </td>
                 </tr>
@@ -332,17 +331,17 @@ export default function CurriculumManagement() {
                 filteredTopics.map((topic) => {
                   const cat = curriculum.categories.find((c) => c.id === topic.category_id);
                   return (
-                    <tr key={topic.id} className="hover:bg-slate-50/70 transition-colors">
+                    <tr key={topic.id} className="hover:bg-[#FAFAFA] transition-colors">
                       <td className="px-5 py-4 max-w-md">
                         <div>
                           <div className="flex items-center gap-1.5 mb-1">
-                            <span className="font-bold text-slate-900 text-xs">{topic.title}</span>
-                            <span className="font-mono text-[10px] text-slate-400">({topic.id})</span>
+                            <span className="font-bold text-[#111111] text-xs">{topic.title}</span>
+                            <span className="font-mono text-[10px] text-[#A1A1AA]">({topic.id})</span>
                           </div>
-                          <p className="text-[11px] text-slate-500 line-clamp-1 mb-1">
+                          <p className="text-[11px] text-[#71717A] line-clamp-1 mb-1.5">
                             {topic.description}
                           </p>
-                          <span className="inline-block text-[10px] text-amber-900 bg-amber-50 px-2 py-0.5 rounded border border-amber-200 font-medium">
+                          <span className="inline-block text-[10px] text-[#111111] bg-[#FEF9E6] px-2 py-0.5 rounded-md border border-[#F9C321]/40 font-semibold">
                             Category: {cat?.name || 'Unassigned'}
                           </span>
                         </div>
@@ -350,7 +349,7 @@ export default function CurriculumManagement() {
 
                       <td className="px-4 py-4">
                         <div className="space-y-1">
-                          <span className="font-semibold text-slate-800 block">
+                          <span className="font-bold text-[#111111] block">
                             {topic.year_id === 'year_1' ? '1st Year' : topic.year_id === 'year_2' ? '2nd Year' : '3rd Year'}
                           </span>
                           <StatusBadge status={topic.track_id} type="track" />
@@ -360,29 +359,30 @@ export default function CurriculumManagement() {
                       <td className="px-4 py-4">
                         <div className="space-y-1">
                           <StatusBadge status={topic.difficulty} type="difficulty" />
-                          <span className="text-[11px] text-slate-500 font-mono block">
+                          <span className="text-[11px] text-[#71717A] font-mono block">
                             {topic.estimated_duration_minutes} mins
                           </span>
                         </div>
                       </td>
 
                       <td className="px-4 py-4">
-                        <div className="space-y-1">
+                        <div className="space-y-1.5">
                           <span
-                            className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold ${
+                            className={`inline-block px-2 py-0.5 rounded-md text-[10px] font-bold ${
                               topic.is_required
-                                ? 'bg-indigo-50 text-indigo-700 border border-indigo-200'
-                                : 'bg-slate-100 text-slate-600'
+                                ? 'bg-[#111111] text-white border border-[#111111]'
+                                : 'bg-[#F4F4F5] text-[#71717A] border border-[#E4E4E7]'
                             }`}
                           >
                             {topic.is_required ? 'Required Topic' : 'Elective'}
                           </span>
                           <span
-                            className={`block text-[10px] ${
-                              topic.is_published ? 'text-emerald-600 font-semibold' : 'text-slate-400'
+                            className={`flex items-center gap-1 text-[10px] ${
+                              topic.is_published ? 'text-[#111111] font-bold' : 'text-[#A1A1AA]'
                             }`}
                           >
-                            {topic.is_published ? '● Published' : '○ Draft Hidden'}
+                            <span className={`w-1.5 h-1.5 rounded-full ${topic.is_published ? 'bg-[#111111]' : 'bg-[#D4D4D8]'}`} />
+                            {topic.is_published ? 'Published' : 'Draft Hidden'}
                           </span>
                         </div>
                       </td>
@@ -391,14 +391,14 @@ export default function CurriculumManagement() {
                         <div className="flex items-center justify-end gap-1.5">
                           <button
                             onClick={() => handleEditTopic(topic)}
-                            className="p-1.5 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                            className="p-1.5 rounded-lg border border-[#E4E4E7] text-[#111111] hover:bg-[#111111] hover:text-[#F9C321] hover:border-[#111111] transition-all"
                             title="Edit Topic"
                           >
                             <Edit2 className="w-4 h-4" />
                           </button>
                           <button
                             onClick={() => handleDeleteTopic(topic.id)}
-                            className="p-1.5 rounded-lg border border-rose-200 text-rose-600 hover:bg-rose-50"
+                            className="p-1.5 rounded-lg border border-[#E4E4E7] text-[#71717A] hover:bg-rose-50 hover:border-rose-200 hover:text-rose-600 transition-all"
                             title="Delete Topic"
                           >
                             <Trash2 className="w-4 h-4" />
@@ -423,25 +423,25 @@ export default function CurriculumManagement() {
       >
         <form onSubmit={handleSaveTopic} className="space-y-4 text-xs">
           <div>
-            <label className="block font-semibold text-slate-700 mb-1">Topic Title *</label>
+            <label className="block font-bold text-[#111111] mb-1">Topic Title *</label>
             <input
               type="text"
               required
               placeholder="e.g. Asynchronous Microservices with FastAPI"
               value={topicForm.title}
               onChange={(e) => setTopicForm({ ...topicForm, title: e.target.value })}
-              className="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-hidden focus:border-amber-400"
+              className="w-full px-3 py-2 rounded-lg border border-[#E4E4E7] focus:outline-hidden focus:border-[#111111] focus:ring-1 focus:ring-[#111111] text-[#111111] bg-white"
             />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">Category *</label>
+              <label className="block font-bold text-[#111111] mb-1">Category *</label>
               <select
                 required
                 value={topicForm.category_id}
                 onChange={(e) => setTopicForm({ ...topicForm, category_id: e.target.value })}
-                className="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-hidden focus:border-amber-400 bg-white"
+                className="w-full px-3 py-2 rounded-lg border border-[#E4E4E7] focus:outline-hidden focus:border-[#111111] focus:ring-1 focus:ring-[#111111] bg-white text-[#111111]"
               >
                 {curriculum.categories.map((c) => (
                   <option key={c.id} value={c.id}>
@@ -451,11 +451,11 @@ export default function CurriculumManagement() {
               </select>
             </div>
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">Engineering Year</label>
+              <label className="block font-bold text-[#111111] mb-1">Engineering Year</label>
               <select
                 value={topicForm.year_id}
                 onChange={(e) => setTopicForm({ ...topicForm, year_id: e.target.value })}
-                className="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-hidden focus:border-amber-400 bg-white"
+                className="w-full px-3 py-2 rounded-lg border border-[#E4E4E7] focus:outline-hidden focus:border-[#111111] focus:ring-1 focus:ring-[#111111] bg-white text-[#111111]"
               >
                 <option value="year_1">1st Year (Common)</option>
                 <option value="year_2">2nd Year (Tracks)</option>
@@ -463,11 +463,11 @@ export default function CurriculumManagement() {
               </select>
             </div>
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">Specialization Track</label>
+              <label className="block font-bold text-[#111111] mb-1">Specialization Track</label>
               <select
                 value={topicForm.track_id}
                 onChange={(e) => setTopicForm({ ...topicForm, track_id: e.target.value })}
-                className="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-hidden focus:border-amber-400 bg-white"
+                className="w-full px-3 py-2 rounded-lg border border-[#E4E4E7] focus:outline-hidden focus:border-[#111111] focus:ring-1 focus:ring-[#111111] bg-white text-[#111111]"
               >
                 <option value="common">Common Foundation</option>
                 <option value="fullstack">Full-Stack & App Dev</option>
@@ -477,19 +477,19 @@ export default function CurriculumManagement() {
           </div>
 
           <div>
-            <label className="block font-semibold text-slate-700 mb-1">Description *</label>
+            <label className="block font-bold text-[#111111] mb-1">Description *</label>
             <textarea
               rows={2}
               required
               placeholder="Comprehensive summary of what the engineering student will master..."
               value={topicForm.description}
               onChange={(e) => setTopicForm({ ...topicForm, description: e.target.value })}
-              className="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-hidden focus:border-amber-400"
+              className="w-full px-3 py-2 rounded-lg border border-[#E4E4E7] focus:outline-hidden focus:border-[#111111] focus:ring-1 focus:ring-[#111111] text-[#111111] bg-white"
             />
           </div>
 
           <div>
-            <label className="block font-semibold text-slate-700 mb-1">
+            <label className="block font-bold text-[#111111] mb-1">
               Learning Objectives (One objective per line)
             </label>
             <textarea
@@ -497,28 +497,28 @@ export default function CurriculumManagement() {
               placeholder="Understand asynchronous coroutines&#10;Implement dependency injection in FastAPI&#10;Write integration tests with PyTest"
               value={topicForm.learning_objectives}
               onChange={(e) => setTopicForm({ ...topicForm, learning_objectives: e.target.value })}
-              className="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-hidden focus:border-amber-400 font-mono text-[11px]"
+              className="w-full px-3 py-2 rounded-lg border border-[#E4E4E7] focus:outline-hidden focus:border-[#111111] focus:ring-1 focus:ring-[#111111] font-mono text-[11px] text-[#111111] bg-white"
             />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">Estimated Duration (Mins)</label>
+              <label className="block font-bold text-[#111111] mb-1">Estimated Duration (Mins)</label>
               <input
                 type="number"
                 min={15}
                 max={600}
                 value={topicForm.estimated_duration_minutes}
                 onChange={(e) => setTopicForm({ ...topicForm, estimated_duration_minutes: e.target.value })}
-                className="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-hidden focus:border-amber-400 font-mono"
+                className="w-full px-3 py-2 rounded-lg border border-[#E4E4E7] focus:outline-hidden focus:border-[#111111] focus:ring-1 focus:ring-[#111111] font-mono text-[#111111] bg-white"
               />
             </div>
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">Difficulty Level</label>
+              <label className="block font-bold text-[#111111] mb-1">Difficulty Level</label>
               <select
                 value={topicForm.difficulty}
                 onChange={(e) => setTopicForm({ ...topicForm, difficulty: e.target.value })}
-                className="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-hidden focus:border-amber-400 bg-white"
+                className="w-full px-3 py-2 rounded-lg border border-[#E4E4E7] focus:outline-hidden focus:border-[#111111] focus:ring-1 focus:ring-[#111111] bg-white text-[#111111]"
               >
                 <option value="Beginner">Beginner</option>
                 <option value="Intermediate">Intermediate</option>
@@ -528,49 +528,49 @@ export default function CurriculumManagement() {
           </div>
 
           <div>
-            <label className="block font-semibold text-slate-700 mb-1">Associated Project Prompt</label>
+            <label className="block font-bold text-[#111111] mb-1">Associated Project Prompt</label>
             <input
               type="text"
               placeholder="e.g. Build a high-throughput async product API with Swagger documentation."
               value={topicForm.suggested_project}
               onChange={(e) => setTopicForm({ ...topicForm, suggested_project: e.target.value })}
-              className="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-hidden focus:border-amber-400"
+              className="w-full px-3 py-2 rounded-lg border border-[#E4E4E7] focus:outline-hidden focus:border-[#111111] focus:ring-1 focus:ring-[#111111] text-[#111111] bg-white"
             />
           </div>
 
           <div className="flex items-center gap-6 pt-2">
-            <label className="flex items-center gap-2 cursor-pointer font-semibold text-slate-700">
+            <label className="flex items-center gap-2 cursor-pointer font-bold text-[#111111]">
               <input
                 type="checkbox"
                 checked={topicForm.is_required}
                 onChange={(e) => setTopicForm({ ...topicForm, is_required: e.target.checked })}
-                className="rounded text-amber-500 focus:ring-amber-400"
+                className="rounded accent-[#111111]"
               />
               <span>Required for Completion %</span>
             </label>
-            <label className="flex items-center gap-2 cursor-pointer font-semibold text-slate-700">
+            <label className="flex items-center gap-2 cursor-pointer font-bold text-[#111111]">
               <input
                 type="checkbox"
                 checked={topicForm.is_published}
                 onChange={(e) => setTopicForm({ ...topicForm, is_published: e.target.checked })}
-                className="rounded text-amber-500 focus:ring-amber-400"
+                className="rounded accent-[#111111]"
               />
               <span>Published (Visible to Students)</span>
             </label>
           </div>
 
-          <div className="flex justify-end gap-2 pt-3 border-t border-slate-100">
+          <div className="flex justify-end gap-2 pt-4 border-t border-[#E4E4E7]">
             <button
               type="button"
               onClick={() => setIsTopicModalOpen(false)}
-              className="px-4 py-2 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 font-semibold"
+              className="px-4 py-2 rounded-lg border border-[#E4E4E7] text-[#111111] hover:bg-[#F4F4F5] font-bold transition-all"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={saving}
-              className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-amber-300 font-bold shadow-xs"
+              className="px-4 py-2 rounded-lg bg-[#F9C321] hover:bg-[#E5B21D] text-[#111111] font-bold shadow-xs transition-all"
             >
               {saving ? 'Saving...' : editingTopic ? 'Update Topic' : 'Create Topic'}
             </button>
@@ -586,34 +586,34 @@ export default function CurriculumManagement() {
       >
         <form onSubmit={handleSaveCategory} className="space-y-4 text-xs">
           <div>
-            <label className="block font-semibold text-slate-700 mb-1">Category Name *</label>
+            <label className="block font-bold text-[#111111] mb-1">Category Name *</label>
             <input
               type="text"
               required
               placeholder="e.g. Distributed Messaging & Event Streaming"
               value={catForm.name}
               onChange={(e) => setCatForm({ ...catForm, name: e.target.value })}
-              className="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-hidden focus:border-amber-400"
+              className="w-full px-3 py-2 rounded-lg border border-[#E4E4E7] focus:outline-hidden focus:border-[#111111] focus:ring-1 focus:ring-[#111111] text-[#111111] bg-white"
             />
           </div>
 
           <div>
-            <label className="block font-semibold text-slate-700 mb-1">Description</label>
+            <label className="block font-bold text-[#111111] mb-1">Description</label>
             <textarea
               rows={2}
               value={catForm.description}
               onChange={(e) => setCatForm({ ...catForm, description: e.target.value })}
-              className="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-hidden focus:border-amber-400"
+              className="w-full px-3 py-2 rounded-lg border border-[#E4E4E7] focus:outline-hidden focus:border-[#111111] focus:ring-1 focus:ring-[#111111] text-[#111111] bg-white"
             />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">Engineering Year</label>
+              <label className="block font-bold text-[#111111] mb-1">Engineering Year</label>
               <select
                 value={catForm.year_id}
                 onChange={(e) => setCatForm({ ...catForm, year_id: e.target.value })}
-                className="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-hidden focus:border-amber-400 bg-white"
+                className="w-full px-3 py-2 rounded-lg border border-[#E4E4E7] focus:outline-hidden focus:border-[#111111] focus:ring-1 focus:ring-[#111111] bg-white text-[#111111]"
               >
                 <option value="year_1">1st Year Foundation</option>
                 <option value="year_2">2nd Year Core Specialization</option>
@@ -621,11 +621,11 @@ export default function CurriculumManagement() {
               </select>
             </div>
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">Specialization Track</label>
+              <label className="block font-bold text-[#111111] mb-1">Specialization Track</label>
               <select
                 value={catForm.track_id}
                 onChange={(e) => setCatForm({ ...catForm, track_id: e.target.value })}
-                className="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-hidden focus:border-amber-400 bg-white"
+                className="w-full px-3 py-2 rounded-lg border border-[#E4E4E7] focus:outline-hidden focus:border-[#111111] focus:ring-1 focus:ring-[#111111] bg-white text-[#111111]"
               >
                 <option value="common">Common Foundation</option>
                 <option value="fullstack">Full-Stack & App Dev</option>
@@ -634,18 +634,18 @@ export default function CurriculumManagement() {
             </div>
           </div>
 
-          <div className="flex justify-end gap-2 pt-3 border-t border-slate-100">
+          <div className="flex justify-end gap-2 pt-4 border-t border-[#E4E4E7]">
             <button
               type="button"
               onClick={() => setIsCatModalOpen(false)}
-              className="px-4 py-2 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 font-semibold"
+              className="px-4 py-2 rounded-lg border border-[#E4E4E7] text-[#111111] hover:bg-[#F4F4F5] font-bold transition-all"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={saving}
-              className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-amber-300 font-bold shadow-xs"
+              className="px-4 py-2 rounded-lg bg-[#F9C321] hover:bg-[#E5B21D] text-[#111111] font-bold shadow-xs transition-all"
             >
               {saving ? 'Saving...' : 'Save Category'}
             </button>

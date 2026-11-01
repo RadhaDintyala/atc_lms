@@ -12,7 +12,6 @@ import {
   FileCheck2,
   FileSpreadsheet,
   Settings,
-  Sparkles,
   ChevronRight,
   LogOut,
 } from 'lucide-react';
@@ -51,28 +50,28 @@ export default function Sidebar({ currentTab, setTab, isOpen, onClose }) {
       {/* Mobile Backdrop */}
       {isOpen && (
         <div
-          className="fixed inset-0 z-40 bg-slate-900/50 backdrop-blur-xs md:hidden"
+          className="fixed inset-0 z-40 bg-[#111111]/60 md:hidden"
           onClick={onClose}
         />
       )}
 
       {/* Sidebar container */}
       <aside
-        className={`fixed md:sticky top-0 md:top-[61px] left-0 z-40 h-full md:h-[calc(100vh-61px)] w-64 bg-white border-r border-slate-200/90 flex flex-col justify-between transition-transform duration-300 ease-in-out ${
+        className={`fixed md:sticky top-0 md:top-[57px] left-0 z-40 h-full md:h-[calc(100vh-57px)] w-64 bg-white border-r border-[#E4E4E7] flex flex-col justify-between transition-transform duration-200 ease-in-out ${
           isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
         }`}
       >
         <div className="py-4 px-3 flex-1 overflow-y-auto">
           {/* Role header in sidebar */}
-          <div className="px-3 py-2 mb-3 bg-slate-50 rounded-xl border border-slate-200/80">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+          <div className="px-3 py-2.5 mb-3 bg-[#FAFAFA] rounded-lg border border-[#E4E4E7]">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-[#71717A]">
               {isAdmin ? 'ADMINISTRATOR PORTAL' : 'STUDENT WORKSPACE'}
             </p>
-            <p className="text-xs font-semibold text-slate-800 truncate mt-0.5">
+            <p className="text-xs font-bold text-[#111111] truncate mt-0.5">
               {user?.full_name}
             </p>
             {!isAdmin && profile && (
-              <p className="text-[11px] text-slate-500 font-mono">
+              <p className="text-[11px] text-[#71717A] font-mono mt-0.5">
                 {profile.roll_number}
               </p>
             )}
@@ -86,22 +85,24 @@ export default function Sidebar({ currentTab, setTab, isOpen, onClose }) {
               return (
                 <button
                   key={item.id}
+                  id={`nav-${item.id}`}
+                  data-testid={`nav-${item.id}`}
                   onClick={() => handleNavClick(item.id)}
-                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                  className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
                     isActive
-                      ? 'bg-amber-400/15 text-slate-900 font-semibold border border-amber-300/80 shadow-2xs'
-                      : 'text-slate-600 hover:bg-slate-100/80 hover:text-slate-900'
+                      ? 'bg-[#111111] text-white shadow-xs'
+                      : 'text-[#52525B] hover:bg-[#F4F4F5] hover:text-[#111111]'
                   }`}
                 >
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2.5">
                     <Icon
                       className={`w-4 h-4 ${
-                        isActive ? 'text-amber-600' : 'text-slate-400'
+                        isActive ? 'text-[#F9C321]' : 'text-[#71717A]'
                       }`}
                     />
                     <span>{item.label}</span>
                   </div>
-                  {isActive && <ChevronRight className="w-3.5 h-3.5 text-amber-600" />}
+                  {isActive && <ChevronRight className="w-3.5 h-3.5 text-[#F9C321]" />}
                 </button>
               );
             })}
@@ -109,20 +110,20 @@ export default function Sidebar({ currentTab, setTab, isOpen, onClose }) {
         </div>
 
         {/* Bottom Banner & Sign Out */}
-        <div className="p-3 border-t border-slate-200/80 bg-slate-50/50">
+        <div className="p-3 border-t border-[#E4E4E7] bg-[#FAFAFA]">
           {!isAdmin && (
-            <div className="p-3 rounded-xl bg-gradient-to-br from-amber-50 to-yellow-50 border border-amber-200/70 mb-3">
-              <div className="flex items-center gap-2 mb-1">
-                <Sparkles className="w-3.5 h-3.5 text-amber-700" />
-                <span className="text-xs font-bold text-amber-900">
-                  Engineering Track
+            <div className="p-3 rounded-lg bg-[#FEF9E6] border border-[#F5D365] mb-2.5">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-[#111111]">
+                  Current Track
                 </span>
+                <span className="w-2 h-2 rounded-full bg-[#F9C321]"></span>
               </div>
-              <p className="text-[11px] text-amber-800 leading-snug">
+              <p className="text-xs font-bold text-[#111111] leading-tight">
                 {profile?.current_year === 'year_1'
                   ? 'Common Foundation Year'
                   : profile?.track_id === 'fullstack'
-                  ? 'Full-Stack & Application Dev'
+                  ? 'Full-Stack & App Dev'
                   : profile?.track_id === 'ai'
                   ? 'AI Engineering Track'
                   : 'Common Curriculum'}
@@ -132,7 +133,7 @@ export default function Sidebar({ currentTab, setTab, isOpen, onClose }) {
 
           <button
             onClick={logout}
-            className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
+            className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-[#71717A] hover:text-[#111111] hover:bg-white rounded-lg border border-transparent hover:border-[#E4E4E7] transition-all cursor-pointer"
           >
             <LogOut className="w-4 h-4" />
             <span>Sign Out Session</span>

@@ -46,7 +46,7 @@ class UserOut(UserBase):
 # Student Profile Schemas
 class StudentProfileBase(BaseModel):
     roll_number: str
-    college: str = "Apex Institute of Technology"
+    college: str = "Beacon Institute of Technology"
     department: str
     current_year: EngineeringYear
     track_id: SpecializationTrack
@@ -58,7 +58,7 @@ class StudentCreate(BaseModel):
     email: EmailStr
     password: str
     roll_number: str
-    college: Optional[str] = "Apex Institute of Technology"
+    college: Optional[str] = "Beacon Institute of Technology"
     department: str
     current_year: EngineeringYear
     track_id: SpecializationTrack

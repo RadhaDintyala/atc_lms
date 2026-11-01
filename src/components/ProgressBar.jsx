@@ -6,35 +6,42 @@ export default function ProgressBar({
   label = '',
   showPercentage = true,
   size = 'md',
-  color = 'yellow', // 'yellow' | 'cyan' | 'emerald' | 'blue'
+  color = 'yellow', // 'yellow' | 'dark' | 'neutral'
   className = '',
 }) {
   const percentage = Math.min(100, Math.max(0, Math.round(((value || 0) / (max || 100)) * 100)));
 
   const sizeClasses = {
     sm: 'h-1.5',
-    md: 'h-2.5',
-    lg: 'h-4',
+    md: 'h-2',
+    lg: 'h-3',
   };
 
-  const colorGradients = {
-    yellow: 'bg-gradient-to-r from-amber-400 to-yellow-500 shadow-sm shadow-amber-200',
-    cyan: 'bg-gradient-to-r from-cyan-400 to-cyan-500 shadow-sm shadow-cyan-200',
-    emerald: 'bg-gradient-to-r from-emerald-400 to-emerald-500',
-    blue: 'bg-gradient-to-r from-blue-500 to-indigo-500',
+  // Modern solid architectural fills
+  const getFillClass = (col) => {
+    switch (col) {
+      case 'dark':
+      case 'black':
+        return 'bg-[#111111]';
+      case 'neutral':
+        return 'bg-[#71717A]';
+      case 'yellow':
+      default:
+        return 'bg-[#F9C321]';
+    }
   };
 
   return (
     <div className={`w-full ${className}`}>
       {(label || showPercentage) && (
-        <div className="flex justify-between items-center text-xs font-semibold mb-1.5 text-slate-700">
-          {label && <span className="truncate pr-2">{label}</span>}
-          {showPercentage && <span className="font-mono text-slate-900">{percentage}%</span>}
+        <div className="flex justify-between items-center text-xs font-semibold mb-1.5 text-[#111111]">
+          {label && <span className="truncate pr-2 text-[#71717A] font-medium">{label}</span>}
+          {showPercentage && <span className="font-mono text-[#111111] font-bold">{percentage}%</span>}
         </div>
       )}
-      <div className={`w-full bg-slate-100 rounded-full overflow-hidden border border-slate-200/80 ${sizeClasses[size] || sizeClasses.md}`}>
+      <div className={`w-full bg-[#F4F4F5] rounded-sm overflow-hidden border border-[#E4E4E7] ${sizeClasses[size] || sizeClasses.md}`}>
         <div
-          className={`h-full transition-all duration-500 ease-out rounded-full ${colorGradients[color] || colorGradients.yellow}`}
+          className={`h-full transition-all duration-300 ease-out rounded-sm ${getFillClass(color)}`}
           style={{ width: `${percentage}%` }}
         />
       </div>

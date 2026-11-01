@@ -2,7 +2,7 @@ import os
 from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
-    PROJECT_NAME: str = "ApexLMS Engineering Project Roadmap"
+    PROJECT_NAME: str = "Beacon Engineering Project Roadmap"
     API_V1_STR: str = "/api/v1"
     SECRET_KEY: str = os.getenv("SECRET_KEY", "super-secret-jwt-encryption-key-for-engineering-lms-2026")
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7  # 7 days
@@ -13,7 +13,7 @@ class Settings(BaseSettings):
     MONGO_PORT: int = int(os.getenv("MONGO_PORT", "27017"))
     MONGO_USER: str = os.getenv("MONGO_USER", "")
     MONGO_PASSWORD: str = os.getenv("MONGO_PASSWORD", "")
-    MONGO_DB_NAME: str = os.getenv("MONGO_DB_NAME", "apexlms_db")
+    MONGO_DB_NAME: str = os.getenv("MONGO_DB_NAME", "beacon_db")
     
     # Derived or explicit MongoDB Connection URI
     MONGO_URI: str = os.getenv(
@@ -32,5 +32,6 @@ class Settings(BaseSettings):
     class Config:
         case_sensitive = True
         env_file = ".env"
+        extra = "ignore"  # Ignores frontend env keys like JWT_SECRET, APP_URL, VITE_API_BASE_URL
 
 settings = Settings()

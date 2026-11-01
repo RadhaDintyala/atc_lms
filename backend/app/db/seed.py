@@ -1,5 +1,5 @@
 """
-PostgreSQL Database Seeding Script for ApexLMS
+PostgreSQL Database Seeding Script for Beacon LMS
 Seeds all curriculum years, categories, topics, placeholder resources, sample students, and projects.
 Usage: python -m app.db.seed
 """
@@ -39,7 +39,7 @@ def seed_database():
     db = SessionLocal()
     try:
         # Check if already seeded
-        if db.query(User).filter(User.email == "mentor.admin@apex.edu").first():
+        if db.query(User).filter(User.email == "mentor.admin@beacon.edu").first():
             print("Database already contains seed data. Skipping.")
             return
 
@@ -80,7 +80,7 @@ def seed_database():
         # Admin User
         admin_user = User(
             id="usr-admin-1",
-            email="mentor.admin@apex.edu",
+            email="mentor.admin@beacon.edu",
             password_hash=get_password_hash("Password@123"),
             role=UserRole.ADMIN,
             full_name="Dr. Sarah Chen (Chief Mentor)",
@@ -94,7 +94,7 @@ def seed_database():
                 "id": "usr-student-1",
                 "prof_id": "prof-student-1",
                 "name": "Alex Rivers",
-                "email": "alex.rivers@apex.edu",
+                "email": "alex.rivers@beacon.edu",
                 "roll": "ENG2026-0142",
                 "dept": "Computer Science & Engineering",
                 "year": EngineeringYear.YEAR_1,
@@ -106,7 +106,7 @@ def seed_database():
                 "id": "usr-student-2",
                 "prof_id": "prof-student-2",
                 "name": "Priya Patel",
-                "email": "priya.patel@apex.edu",
+                "email": "priya.patel@beacon.edu",
                 "roll": "ENG2025-0089",
                 "dept": "Information Technology",
                 "year": EngineeringYear.YEAR_2,
@@ -118,7 +118,7 @@ def seed_database():
                 "id": "usr-student-3",
                 "prof_id": "prof-student-3",
                 "name": "Marcus Vance",
-                "email": "marcus.vance@apex.edu",
+                "email": "marcus.vance@beacon.edu",
                 "roll": "ENG2025-0215",
                 "dept": "AI & Data Science",
                 "year": EngineeringYear.YEAR_2,
@@ -130,7 +130,7 @@ def seed_database():
                 "id": "usr-student-4",
                 "prof_id": "prof-student-4",
                 "name": "Elena Rostova",
-                "email": "elena.rostova@apex.edu",
+                "email": "elena.rostova@beacon.edu",
                 "roll": "ENG2024-0033",
                 "dept": "Software Engineering",
                 "year": EngineeringYear.YEAR_3,
@@ -142,7 +142,7 @@ def seed_database():
                 "id": "usr-student-5",
                 "prof_id": "prof-student-5",
                 "name": "Devon Lane",
-                "email": "devon.lane@apex.edu",
+                "email": "devon.lane@beacon.edu",
                 "roll": "ENG2025-0371",
                 "dept": "Computer Engineering",
                 "year": EngineeringYear.YEAR_2,
@@ -168,7 +168,7 @@ def seed_database():
                 id=s["prof_id"],
                 user_id=user.id,
                 roll_number=s["roll"],
-                college="Apex Institute of Technology",
+                college="Beacon Institute of Technology",
                 department=s["dept"],
                 current_year=s["year"],
                 track_id=s["track"],

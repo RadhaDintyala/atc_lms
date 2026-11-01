@@ -1,5 +1,5 @@
 """
-Unit and Integration Tests for ApexLMS FastAPI Backend
+Unit and Integration Tests for Beacon FastAPI Backend
 """
 
 import pytest

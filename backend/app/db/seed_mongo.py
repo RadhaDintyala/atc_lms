@@ -1,5 +1,5 @@
 """
-MongoDB Database Seeding Script for ApexLMS
+MongoDB Database Seeding Script for Beacon LMS
 Seeds all collections: users, student_profiles, curriculum_tracks, curriculum_years,
 categories, topics, placeholder resources, sample students, and project submissions.
 Usage: python -m app.db.seed_mongo
@@ -18,7 +18,7 @@ def seed_mongo():
     db = client[settings.MONGO_DB_NAME]
 
     # Check if already seeded
-    if db.users.find_one({"email": "mentor.admin@apex.edu"}):
+    if db.users.find_one({"email": "mentor.admin@beacon.edu"}):
         print("MongoDB database already contains seed data. Skipping.")
         return
 
@@ -69,7 +69,7 @@ def seed_mongo():
     print("Seeding Users and Profiles...")
     admin_user = {
         "_id": "usr-admin-1",
-        "email": "mentor.admin@apex.edu",
+        "email": "mentor.admin@beacon.edu",
         "password_hash": get_password_hash("Password@123"),
         "role": "admin",
         "full_name": "Dr. Sarah Chen (Chief Mentor)",
@@ -84,7 +84,7 @@ def seed_mongo():
             "user_id": "usr-student-1",
             "prof_id": "prof-student-1",
             "name": "Alex Rivers",
-            "email": "alex.rivers@apex.edu",
+            "email": "alex.rivers@beacon.edu",
             "roll": "ENG2026-0142",
             "dept": "Computer Science & Engineering",
             "year": "year_1",
@@ -96,7 +96,7 @@ def seed_mongo():
             "user_id": "usr-student-2",
             "prof_id": "prof-student-2",
             "name": "Priya Patel",
-            "email": "priya.patel@apex.edu",
+            "email": "priya.patel@beacon.edu",
             "roll": "ENG2025-0089",
             "dept": "Information Technology",
             "year": "year_2",
@@ -108,7 +108,7 @@ def seed_mongo():
             "user_id": "usr-student-3",
             "prof_id": "prof-student-3",
             "name": "Marcus Vance",
-            "email": "marcus.vance@apex.edu",
+            "email": "marcus.vance@beacon.edu",
             "roll": "ENG2025-0215",
             "dept": "AI & Data Science",
             "year": "year_2",
@@ -120,7 +120,7 @@ def seed_mongo():
             "user_id": "usr-student-4",
             "prof_id": "prof-student-4",
             "name": "Elena Rostova",
-            "email": "elena.rostova@apex.edu",
+            "email": "elena.rostova@beacon.edu",
             "roll": "ENG2024-0033",
             "dept": "Software Engineering",
             "year": "year_3",
@@ -132,7 +132,7 @@ def seed_mongo():
             "user_id": "usr-student-5",
             "prof_id": "prof-student-5",
             "name": "Devon Lane",
-            "email": "devon.lane@apex.edu",
+            "email": "devon.lane@beacon.edu",
             "roll": "ENG2025-0371",
             "dept": "Computer Engineering",
             "year": "year_2",
@@ -159,7 +159,7 @@ def seed_mongo():
             "_id": s["prof_id"],
             "user_id": s["user_id"],
             "roll_number": s["roll"],
-            "college": "Apex Institute of Technology",
+            "college": "Beacon Institute of Technology",
             "department": s["dept"],
             "current_year": s["year"],
             "track_id": s["track"],

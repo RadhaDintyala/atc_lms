@@ -2,16 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { api } from '../../services/api.js';
 import Modal from '../../components/Modal.jsx';
 import StatusBadge from '../../components/StatusBadge.jsx';
-import ProgressBar from '../../components/ProgressBar.jsx';
 import {
-  User,
-  Mail,
-  GraduationCap,
-  Building2,
-  FolderGit2,
-  Calendar,
-  Clock,
-  CheckCircle2,
   ExternalLink,
   Github,
 } from 'lucide-react';
@@ -46,38 +37,38 @@ export default function StudentDetailModal({ profileId, isOpen, onClose }) {
       maxWidth="max-w-3xl"
     >
       {loading || !data ? (
-        <div className="p-8 text-center text-xs text-slate-500">Loading student dossier...</div>
+        <div className="p-8 text-center text-xs text-[#71717A]">Loading student dossier...</div>
       ) : (
-        <div className="space-y-6 text-xs">
+        <div className="space-y-5 text-xs">
           {/* Header summary */}
-          <div className="flex flex-col sm:flex-row items-center sm:items-start justify-between gap-4 p-4 rounded-xl bg-slate-50 border border-slate-200">
+          <div className="flex flex-col sm:flex-row items-center sm:items-start justify-between gap-4 p-4 rounded-xl bg-[#FAFAFA] border border-[#E4E4E7]">
             <div>
               <div className="flex items-center gap-2 mb-1">
-                <h3 className="text-base font-bold text-slate-900">{data.user.full_name}</h3>
+                <h3 className="text-base font-bold text-[#111111]">{data.user.full_name}</h3>
                 <StatusBadge status={data.user.status} type="account" />
               </div>
-              <p className="text-slate-500 font-mono">
+              <p className="text-[#71717A] font-mono">
                 {data.profile.roll_number} • {data.user.email}
               </p>
-              <p className="text-slate-600 mt-1">
+              <p className="text-[#52525B] mt-0.5">
                 {data.profile.department} • {data.profile.college}
               </p>
               <div className="flex items-center gap-2 mt-2">
                 <StatusBadge status={data.profile.track_id} type="track" />
-                <span className="font-semibold text-slate-700 bg-white px-2 py-0.5 rounded border border-slate-200">
+                <span className="font-bold text-[#111111] bg-white px-2 py-0.5 rounded border border-[#E4E4E7]">
                   {data.profile.current_year === 'year_1' ? '1st Year' : data.profile.current_year === 'year_2' ? '2nd Year' : '3rd Year'}
                 </span>
               </div>
             </div>
 
-            <div className="bg-white p-3 rounded-xl border border-slate-200 text-center sm:text-right shrink-0">
-              <span className="text-[10px] font-bold uppercase text-slate-400 block mb-0.5">
+            <div className="bg-white p-3 rounded-lg border border-[#E4E4E7] text-center sm:text-right shrink-0">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-[#71717A] block mb-0.5">
                 Curriculum Mastery
               </span>
-              <span className="text-2xl font-black font-mono text-amber-500">
+              <span className="text-2xl font-black font-mono text-[#111111]">
                 {data.progress?.overallPercentage || 0}%
               </span>
-              <p className="text-[10px] text-slate-500 mt-0.5">
+              <p className="text-[10px] text-[#71717A] mt-0.5">
                 {data.progress?.completedRequiredTopics || 0} of {data.progress?.totalRequiredTopics || 0} topics
               </p>
             </div>
@@ -85,11 +76,11 @@ export default function StudentDetailModal({ profileId, isOpen, onClose }) {
 
           {/* Project Submissions in Detail */}
           <div>
-            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
+            <h4 className="text-[11px] font-bold uppercase tracking-wider text-[#71717A] mb-2">
               Submitted Projects ({data.projects?.length || 0})
             </h4>
             {data.projects?.length === 0 ? (
-              <p className="text-slate-400 italic p-3 bg-slate-50 rounded-lg text-center">
+              <p className="text-[#71717A] italic p-3 bg-[#FAFAFA] rounded-lg text-center border border-[#E4E4E7]">
                 No project submissions yet.
               </p>
             ) : (
@@ -97,27 +88,27 @@ export default function StudentDetailModal({ profileId, isOpen, onClose }) {
                 {data.projects.map((proj) => (
                   <div
                     key={proj.id}
-                    className="p-3 rounded-xl border border-slate-200 bg-white flex flex-col sm:flex-row sm:items-center justify-between gap-2"
+                    className="p-3 rounded-lg border border-[#E4E4E7] bg-white flex flex-col sm:flex-row sm:items-center justify-between gap-2"
                   >
                     <div>
                       <div className="flex items-center gap-2 mb-1">
-                        <span className="font-bold text-slate-900">{proj.title}</span>
+                        <span className="font-bold text-[#111111]">{proj.title}</span>
                         <StatusBadge status={proj.status} type="project" />
                       </div>
-                      <p className="text-slate-500 line-clamp-1">{proj.problem_statement}</p>
+                      <p className="text-[#71717A] line-clamp-1">{proj.problem_statement}</p>
                       {proj.reviewer_feedback && (
-                        <p className="text-amber-800 bg-amber-50 px-2 py-0.5 rounded text-[11px] mt-1 border border-amber-200">
+                        <p className="text-[#111111] bg-[#FEF9E6] px-2 py-0.5 rounded text-[11px] mt-1 border border-[#F5D365]">
                           Mentor Note: {proj.reviewer_feedback}
                         </p>
                       )}
                     </div>
-                    <div className="flex items-center gap-2 shrink-0">
+                    <div className="flex items-center gap-1.5 shrink-0">
                       {proj.github_url && (
                         <a
                           href={proj.github_url}
                           target="_blank"
                           rel="noreferrer"
-                          className="p-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-700"
+                          className="p-1.5 rounded-lg border border-[#E4E4E7] hover:bg-[#F4F4F5] text-[#111111]"
                           title="GitHub Repo"
                         >
                           <Github className="w-3.5 h-3.5" />
@@ -128,7 +119,7 @@ export default function StudentDetailModal({ profileId, isOpen, onClose }) {
                           href={proj.deployment_url}
                           target="_blank"
                           rel="noreferrer"
-                          className="p-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 text-cyan-700"
+                          className="p-1.5 rounded-lg border border-[#E4E4E7] hover:bg-[#F4F4F5] text-[#111111]"
                           title="Live Demo"
                         >
                           <ExternalLink className="w-3.5 h-3.5" />
@@ -143,16 +134,16 @@ export default function StudentDetailModal({ profileId, isOpen, onClose }) {
 
           {/* Topic Progress Breakdown */}
           <div>
-            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
+            <h4 className="text-[11px] font-bold uppercase tracking-wider text-[#71717A] mb-2">
               Topic Status Records
             </h4>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-48 overflow-y-auto pr-1">
               {data.topicProgress?.map((tp) => (
                 <div
                   key={tp.id}
-                  className="p-2.5 rounded-lg border border-slate-100 bg-slate-50 flex items-center justify-between"
+                  className="p-2.5 rounded-lg border border-[#E4E4E7] bg-[#FAFAFA] flex items-center justify-between"
                 >
-                  <span className="font-mono text-slate-700 truncate pr-2">{tp.topic_id}</span>
+                  <span className="font-mono text-[#111111] truncate pr-2 font-semibold">{tp.topic_id}</span>
                   <StatusBadge status={tp.status} type="topic" />
                 </div>
               ))}
@@ -161,17 +152,17 @@ export default function StudentDetailModal({ profileId, isOpen, onClose }) {
 
           {/* Audit Logs */}
           <div>
-            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
+            <h4 className="text-[11px] font-bold uppercase tracking-wider text-[#71717A] mb-2">
               Activity History
             </h4>
             <div className="space-y-1.5 max-h-36 overflow-y-auto pr-1">
               {data.activityLogs?.map((log) => (
                 <div
                   key={log.id}
-                  className="p-2 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-between text-[11px]"
+                  className="p-2 rounded-lg bg-[#FAFAFA] border border-[#E4E4E7] flex items-center justify-between text-[11px]"
                 >
-                  <span className="text-slate-700 truncate pr-2">{log.description}</span>
-                  <span className="text-slate-400 font-mono shrink-0">
+                  <span className="text-[#111111] truncate pr-2">{log.description}</span>
+                  <span className="text-[#71717A] font-mono shrink-0">
                     {new Date(log.timestamp).toLocaleDateString()}
                   </span>
                 </div>

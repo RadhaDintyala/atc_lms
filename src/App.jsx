@@ -21,8 +21,12 @@ import ProjectReviews from './pages/admin/ProjectReviews.jsx';
 import ProgressReports from './pages/admin/ProgressReports.jsx';
 import AdminSettings from './pages/admin/AdminSettings.jsx';
 
+// Auth & Modals
+import AuthPage from './pages/auth/AuthPage.jsx';
+import YearSelectionModal from './components/YearSelectionModal.jsx';
+
 function AppContent() {
-  const { user, isAdmin, loading } = useAuth();
+  const { user, isAdmin, loading, showYearModal, setShowYearModal } = useAuth();
   const [currentTab, setCurrentTab] = useState(isAdmin ? 'admin-dashboard' : 'dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -52,20 +56,33 @@ function AppContent() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+      <div className="min-h-screen bg-[#111111] flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-10 h-10 border-3 border-amber-400 border-t-transparent rounded-full animate-spin"></div>
-          <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
-            Loading ApexLMS Environment...
+          <div className="w-10 h-10 border-3 border-[#F9C321] border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+            Loading Beacon Environment...
           </p>
         </div>
       </div>
     );
   }
 
+  // If unauthenticated, show the Login / Signup Page
+  if (!user) {
+    return <AuthPage />;
+  }
+
   return (
     <div className="min-h-screen bg-[#f8fafc] text-slate-900 flex flex-col antialiased">
-      <Navbar onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
+      <Navbar onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} onNavigateTab={(tab) => setCurrentTab(tab)} />
+
+      {/* Year Selection Modal for Students */}
+      {!isAdmin && (
+        <YearSelectionModal
+          isOpen={showYearModal}
+          onClose={() => setShowYearModal(false)}
+        />
+      )}
 
       <div className="flex flex-1 relative">
         <Sidebar

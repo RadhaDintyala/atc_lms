@@ -1,12 +1,12 @@
 /**
- * API Service for ApexLMS
+ * API Service for Beacon
  * Handles JWT authentication, request headers, and standardized error envelopes.
  */
 
 const BASE_URL = '/api';
 
 function getToken() {
-  return localStorage.getItem('apexlms_token');
+  return localStorage.getItem('beacon_token') || localStorage.getItem('apexlms_token');
 }
 
 async function request(endpoint, options = {}) {
@@ -47,7 +47,17 @@ export const api = {
       method: 'POST',
       body: JSON.stringify({ email, password }),
     }),
+  signup: (signupData) =>
+    request('/auth/signup', {
+      method: 'POST',
+      body: JSON.stringify(signupData),
+    }),
   getMe: () => request('/auth/me'),
+  updateYear: (year, track_id) =>
+    request('/auth/me/year', {
+      method: 'PUT',
+      body: JSON.stringify({ year, track_id }),
+    }),
 
   // Students
   getStudents: () => request('/students'),

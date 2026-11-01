@@ -3,76 +3,36 @@ import { api } from '../services/api.js';
 
 const AuthContext = createContext(null);
 
-export const DEMO_ACCOUNTS = [
-  {
-    role: 'admin',
-    name: 'Dr. Sarah Chen (Chief Mentor)',
-    email: 'mentor.admin@apex.edu',
-    tag: 'Mentor Admin',
-    desc: 'Full administrative access: curriculum management, student roster, project approvals, reports.',
-  },
-  {
-    role: 'student',
-    name: 'Alex Rivers',
-    email: 'alex.rivers@apex.edu',
-    tag: '1st Year • Common Foundation',
-    desc: 'Programming fundamentals, web architecture, Git workflows, prompt engineering.',
-  },
-  {
-    role: 'student',
-    name: 'Priya Patel',
-    email: 'priya.patel@apex.edu',
-    tag: '2nd Year • Full-Stack Track',
-    desc: 'FastAPI, React, PostgreSQL, Docker, Redis, CI/CD, and project submissions.',
-  },
-  {
-    role: 'student',
-    name: 'Marcus Vance',
-    email: 'marcus.vance@apex.edu',
-    tag: '2nd Year • AI Engineering Track',
-    desc: 'Python for AI, Vector DBs, RAG pipelines, Autonomous Agents, LLM evaluation.',
-  },
-  {
-    role: 'student',
-    name: 'Elena Rostova',
-    email: 'elena.rostova@apex.edu',
-    tag: '3rd Year • Advanced Capstone',
-    desc: 'Distributed systems, system design, microservices, performance tuning, and capstone.',
-  },
-  {
-    role: 'student',
-    name: 'Devon Lane',
-    email: 'devon.lane@apex.edu',
-    tag: '2nd Year • Inactive (25d)',
-    desc: 'Inactive student account flagged on admin dashboard for follow-up.',
-  },
-];
-
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
-  const [token, setToken] = useState(localStorage.getItem('apexlms_token') || null);
+  const [token, setToken] = useState(
+    localStorage.getItem('beacon_token') || localStorage.getItem('apexlms_token') || null
+  );
   const [loading, setLoading] = useState(true);
   const [authError, setAuthError] = useState(null);
+  const [showYearModal, setShowYearModal] = useState(false);
 
-  // Initialize auth
+  // Initialize auth on mount
   useEffect(() => {
     async function loadUser() {
       if (!token) {
-        // By default, log in as Priya Patel (Year 2 Full-Stack) to give an immediate rich experience
-        await switchDemoAccount('priya.patel@apex.edu');
+        setUser(null);
+        setProfile(null);
         setLoading(false);
         return;
       }
       try {
         const data = await api.getMe();
         setUser(data.user);
-        setProfile(data.profile);
+        setProfile(data.profile || null);
       } catch (err) {
-        console.warn('Session expired or invalid, logging into default demo account:', err);
+        console.warn('Session expired or invalid:', err);
+        localStorage.removeItem('beacon_token');
         localStorage.removeItem('apexlms_token');
         setToken(null);
-        await switchDemoAccount('priya.patel@apex.edu');
+        setUser(null);
+        setProfile(null);
       } finally {
         setLoading(false);
       }
@@ -86,10 +46,10 @@ export function AuthProvider({ children }) {
     setAuthError(null);
     try {
       const data = await api.login(email, password);
-      localStorage.setItem('apexlms_token', data.token);
+      localStorage.setItem('beacon_token', data.token);
       setToken(data.token);
       setUser(data.user);
-      setProfile(data.profile);
+      setProfile(data.profile || null);
       return data;
     } catch (err) {
       setAuthError(err.message);
@@ -99,28 +59,43 @@ export function AuthProvider({ children }) {
     }
   };
 
-  const switchDemoAccount = async (email) => {
+  const signup = async (signupData) => {
     setLoading(true);
     setAuthError(null);
     try {
-      const data = await api.login(email, 'Password@123');
-      localStorage.setItem('apexlms_token', data.token);
+      const data = await api.signup(signupData);
+      localStorage.setItem('beacon_token', data.token);
       setToken(data.token);
       setUser(data.user);
-      setProfile(data.profile);
+      setProfile(data.profile || null);
       return data;
     } catch (err) {
       setAuthError(err.message);
+      throw err;
     } finally {
       setLoading(false);
     }
   };
 
   const logout = () => {
+    localStorage.removeItem('beacon_token');
     localStorage.removeItem('apexlms_token');
     setToken(null);
     setUser(null);
     setProfile(null);
+    setShowYearModal(false);
+  };
+
+  const updateYear = async (year, track_id) => {
+    try {
+      const updatedProfile = await api.updateYear(year, track_id);
+      setProfile((prev) => ({ ...prev, ...updatedProfile }));
+      setShowYearModal(false);
+      return updatedProfile;
+    } catch (err) {
+      console.error('Failed to update year:', err);
+      throw err;
+    }
   };
 
   const refreshProfile = async () => {
@@ -128,7 +103,7 @@ export function AuthProvider({ children }) {
     try {
       const data = await api.getMe();
       setUser(data.user);
-      setProfile(data.profile);
+      setProfile(data.profile || null);
     } catch (err) {
       console.error('Failed to refresh profile:', err);
     }
@@ -142,9 +117,12 @@ export function AuthProvider({ children }) {
     isAdmin: user?.role === 'admin',
     loading,
     authError,
+    showYearModal,
+    setShowYearModal,
     login,
+    signup,
     logout,
-    switchDemoAccount,
+    updateYear,
     refreshProfile,
   };
 

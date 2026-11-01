@@ -67,7 +67,7 @@ export interface Resource {
   topic_id: string;
   title: string;
   description: string;
-  type: 'Documentation' | 'Video' | 'Course' | 'Tutorial' | 'Repository' | 'Article' | 'Practice';
+  type: 'Documentation' | 'Video' | 'Course' | 'Tutorial' | 'Repository' | 'Article' | 'Practice' | 'Interactive';
   url: string;
   duration_minutes: number;
   difficulty: 'Beginner' | 'Intermediate' | 'Advanced';
@@ -107,6 +107,10 @@ export interface Project {
   deployment_url: string;
   description: string;
   completion_notes?: string;
+  architecture_notes?: string;
+  demo_video_url?: string;
+  testing_notes?: string;
+  documentation_url?: string;
   status: 'draft' | 'submitted' | 'under_review' | 'changes_requested' | 'approved';
   created_at: string;
   submitted_at?: string;

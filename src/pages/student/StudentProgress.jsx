@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { api } from '../../services/api.js';
-import ProgressBar from '../../components/ProgressBar.jsx';
 import StatusBadge from '../../components/StatusBadge.jsx';
 import {
   ResponsiveContainer,
@@ -16,12 +15,8 @@ import {
 } from 'recharts';
 import {
   CheckCircle2,
-  Clock,
   CircleDashed,
   Award,
-  Sparkles,
-  BarChart2,
-  Calendar,
 } from 'lucide-react';
 
 export default function StudentProgress({ onSelectTopic }) {
@@ -54,8 +49,8 @@ export default function StudentProgress({ onSelectTopic }) {
     return (
       <div className="p-8 flex items-center justify-center min-h-[400px]">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 border-3 border-amber-400 border-t-transparent rounded-full animate-spin"></div>
-          <p className="text-sm text-slate-500 font-medium">Computing progress metrics...</p>
+          <div className="w-8 h-8 border-2 border-[#F9C321] border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-xs font-bold text-[#71717A] uppercase tracking-wider">Computing progress metrics...</p>
         </div>
       </div>
     );
@@ -83,38 +78,38 @@ export default function StudentProgress({ onSelectTopic }) {
     };
   }).filter((c) => c.total > 0);
 
-  // Pie chart data
+  // Disciplined Yellow-Black-White Pie Chart Colors
   const pieData = [
-    { name: 'Completed', value: progress.completedRequiredTopics, color: '#10b981' },
-    { name: 'In Progress', value: progress.inProgressTopics, color: '#f59e0b' },
-    { name: 'Pending', value: progress.pendingTopics, color: '#e2e8f0' },
+    { name: 'Completed', value: progress.completedRequiredTopics, color: '#111111' },
+    { name: 'In Progress', value: progress.inProgressTopics, color: '#F9C321' },
+    { name: 'Pending', value: progress.pendingTopics, color: '#E4E4E7' },
   ];
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#E4E4E7]">
         <div>
-          <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">
+          <h1 className="text-2xl font-extrabold text-[#111111] tracking-tight">
             Academic Progress Analytics
           </h1>
-          <p className="text-xs sm:text-sm text-slate-500 mt-1">
+          <p className="text-xs sm:text-sm text-[#71717A] mt-1">
             Topic completion ratios, cohort milestones, and category mastery breakdown.
           </p>
         </div>
 
-        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-amber-50 text-amber-900 border border-amber-200 text-xs font-semibold">
-          <Award className="w-4 h-4 text-amber-600" />
-          <span>Calculated via (Completed Required / Total Required) × 100</span>
+        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#FEF9E6] text-[#111111] border border-[#F5D365] text-xs font-bold">
+          <Award className="w-4 h-4 text-[#111111]" />
+          <span>Curriculum Mastery: {progress.overallPercentage}%</span>
         </div>
       </div>
 
       {/* Visual Progress Cards & Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Status Distribution Pie Chart */}
-        <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs">
-          <h3 className="text-base font-bold text-slate-900 mb-2">Topic Completion Ratio</h3>
-          <p className="text-xs text-slate-500 mb-4">Distribution of all assigned curriculum units</p>
+        <div className="bg-white rounded-xl border border-[#E4E4E7] p-5 shadow-xs">
+          <h3 className="text-sm font-bold text-[#111111] uppercase tracking-wider mb-1">Topic Completion Ratio</h3>
+          <p className="text-xs text-[#71717A] mb-4">Distribution of assigned curriculum units</p>
 
           <div className="h-48 w-full flex items-center justify-center">
             <ResponsiveContainer width="100%" height="100%">
@@ -125,7 +120,7 @@ export default function StudentProgress({ onSelectTopic }) {
                   cy="50%"
                   innerRadius={50}
                   outerRadius={75}
-                  paddingAngle={4}
+                  paddingAngle={3}
                   dataKey="value"
                 >
                   {pieData.map((entry, index) => (
@@ -137,9 +132,9 @@ export default function StudentProgress({ onSelectTopic }) {
                     if (active && payload && payload.length) {
                       const data = payload[0].payload;
                       return (
-                        <div className="bg-slate-900 text-white p-2 rounded-lg text-xs shadow-lg font-mono">
+                        <div className="bg-[#111111] text-white p-2.5 rounded-lg text-xs shadow-lg font-mono border border-[#2E2E32]">
                           <p className="font-bold">{data.name}</p>
-                          <p>{data.value} topics</p>
+                          <p className="text-[#A1A1AA]">{data.value} topics</p>
                         </div>
                       );
                     }
@@ -150,32 +145,32 @@ export default function StudentProgress({ onSelectTopic }) {
             </ResponsiveContainer>
           </div>
 
-          <div className="grid grid-cols-3 gap-2 pt-2 border-t border-slate-100 text-center">
-            <div className="p-2 rounded-lg bg-emerald-50 text-emerald-800">
-              <span className="text-[10px] font-bold uppercase block">Done</span>
+          <div className="grid grid-cols-3 gap-2 pt-3 border-t border-[#E4E4E7] text-center">
+            <div className="p-2 rounded-lg bg-[#111111] text-white">
+              <span className="text-[10px] font-bold uppercase block text-[#A1A1AA]">Done</span>
               <span className="font-mono font-bold text-base">{progress.completedRequiredTopics}</span>
             </div>
-            <div className="p-2 rounded-lg bg-amber-50 text-amber-800">
-              <span className="text-[10px] font-bold uppercase block">Active</span>
+            <div className="p-2 rounded-lg bg-[#FEF9E6] text-[#111111] border border-[#F5D365]">
+              <span className="text-[10px] font-bold uppercase block text-[#111111]">Active</span>
               <span className="font-mono font-bold text-base">{progress.inProgressTopics}</span>
             </div>
-            <div className="p-2 rounded-lg bg-slate-50 text-slate-700">
-              <span className="text-[10px] font-bold uppercase block">Pending</span>
+            <div className="p-2 rounded-lg bg-[#F4F4F5] text-[#111111] border border-[#E4E4E7]">
+              <span className="text-[10px] font-bold uppercase block text-[#71717A]">Pending</span>
               <span className="font-mono font-bold text-base">{progress.pendingTopics}</span>
             </div>
           </div>
         </div>
 
         {/* Category Completion Bar Chart (2 cols) */}
-        <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-200 p-6 shadow-xs flex flex-col justify-between">
+        <div className="lg:col-span-2 bg-white rounded-xl border border-[#E4E4E7] p-5 shadow-xs flex flex-col justify-between">
           <div>
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="text-base font-bold text-slate-900">Category-Wise Completion (%)</h3>
-              <span className="text-xs font-mono text-slate-500 font-semibold">
+            <div className="flex items-center justify-between mb-1 pb-2 border-b border-[#E4E4E7]">
+              <h3 className="text-sm font-bold text-[#111111] uppercase tracking-wider">Category-Wise Completion (%)</h3>
+              <span className="text-xs font-mono text-[#111111] font-bold">
                 Overall: {progress.overallPercentage}%
               </span>
             </div>
-            <p className="text-xs text-slate-500 mb-4">
+            <p className="text-xs text-[#71717A] mb-4">
               Real-time mastery across each curriculum category
             </p>
 
@@ -184,32 +179,32 @@ export default function StudentProgress({ onSelectTopic }) {
                 <BarChart data={categoryChartData} margin={{ top: 10, right: 10, left: -20, bottom: 25 }}>
                   <XAxis
                     dataKey="name"
-                    tick={{ fontSize: 10, fill: '#64748b' }}
+                    tick={{ fontSize: 10, fill: '#71717A' }}
                     interval={0}
                     angle={-25}
                     textAnchor="end"
                   />
-                  <YAxis domain={[0, 100]} tick={{ fontSize: 10, fill: '#64748b' }} />
+                  <YAxis domain={[0, 100]} tick={{ fontSize: 10, fill: '#71717A' }} />
                   <Tooltip
                     content={({ active, payload }) => {
                       if (active && payload && payload.length) {
                         const data = payload[0].payload;
                         return (
-                          <div className="bg-slate-900 text-white p-2.5 rounded-xl text-xs shadow-xl space-y-1">
-                            <p className="font-bold text-amber-300">{data.fullName}</p>
-                            <p className="font-mono">Completed: {data.completed} / {data.total} topics</p>
-                            <p className="font-mono text-emerald-400 font-bold">{data.percentage}% Completed</p>
+                          <div className="bg-[#111111] text-white p-2.5 rounded-lg text-xs shadow-xl space-y-1 border border-[#2E2E32]">
+                            <p className="font-bold text-[#F9C321]">{data.fullName}</p>
+                            <p className="font-mono text-[#A1A1AA]">Completed: {data.completed} / {data.total} topics</p>
+                            <p className="font-mono text-white font-bold">{data.percentage}% Completed</p>
                           </div>
                         );
                       }
                       return null;
                     }}
                   />
-                  <Bar dataKey="percentage" radius={[4, 4, 0, 0]}>
+                  <Bar dataKey="percentage" radius={[3, 3, 0, 0]}>
                     {categoryChartData.map((entry, index) => (
                       <Cell
                         key={`bar-${index}`}
-                        fill={entry.percentage === 100 ? '#10b981' : entry.percentage > 0 ? '#f59e0b' : '#cbd5e1'}
+                        fill={entry.percentage === 100 ? '#111111' : entry.percentage > 0 ? '#F9C321' : '#E4E4E7'}
                       />
                     ))}
                   </Bar>
@@ -218,8 +213,8 @@ export default function StudentProgress({ onSelectTopic }) {
             </div>
           </div>
 
-          <div className="text-[11px] text-slate-400 pt-2 border-t border-slate-100 flex items-center justify-between">
-            <span>Green = 100% completed • Amber = Partially completed • Gray = Not started</span>
+          <div className="text-[11px] text-[#71717A] pt-2 border-t border-[#E4E4E7] flex items-center justify-between">
+            <span>Black = 100% completed • Yellow = In progress • Neutral = Not started</span>
           </div>
         </div>
       </div>
@@ -227,13 +222,13 @@ export default function StudentProgress({ onSelectTopic }) {
       {/* Completed vs Pending Review Lists */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Completed Topics */}
-        <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs">
-          <div className="flex items-center justify-between mb-4">
+        <div className="bg-white rounded-xl border border-[#E4E4E7] p-5 shadow-xs">
+          <div className="flex items-center justify-between mb-4 pb-2 border-b border-[#E4E4E7]">
             <div className="flex items-center gap-2">
-              <CheckCircle2 className="w-5 h-5 text-emerald-600" />
-              <h3 className="font-bold text-slate-900 text-base">Completed Milestones</h3>
+              <CheckCircle2 className="w-4 h-4 text-[#111111]" />
+              <h3 className="font-bold text-[#111111] text-sm uppercase tracking-wider">Completed Milestones</h3>
             </div>
-            <span className="text-xs font-mono font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+            <span className="text-xs font-mono font-bold text-white bg-[#111111] px-2 py-0.5 rounded">
               {progress.completedRequiredTopics} topics
             </span>
           </div>
@@ -245,11 +240,11 @@ export default function StudentProgress({ onSelectTopic }) {
                 <div
                   key={t.id}
                   onClick={() => onSelectTopic(t.id)}
-                  className="p-3 rounded-xl border border-emerald-100 bg-emerald-50/30 flex items-center justify-between hover:bg-emerald-50/60 transition-colors cursor-pointer"
+                  className="p-3 rounded-lg border border-[#E4E4E7] bg-white flex items-center justify-between hover:border-[#111111] transition-colors cursor-pointer"
                 >
                   <div className="min-w-0 pr-2">
-                    <h4 className="text-xs font-bold text-slate-800 truncate">{t.title}</h4>
-                    <p className="text-[11px] text-slate-500 font-mono">
+                    <h4 className="text-xs font-bold text-[#111111] truncate">{t.title}</h4>
+                    <p className="text-[11px] text-[#71717A] font-mono">
                       Duration: {t.estimated_duration_minutes}m
                     </p>
                   </div>
@@ -260,13 +255,13 @@ export default function StudentProgress({ onSelectTopic }) {
         </div>
 
         {/* Pending Topics */}
-        <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs">
-          <div className="flex items-center justify-between mb-4">
+        <div className="bg-white rounded-xl border border-[#E4E4E7] p-5 shadow-xs">
+          <div className="flex items-center justify-between mb-4 pb-2 border-b border-[#E4E4E7]">
             <div className="flex items-center gap-2">
-              <CircleDashed className="w-5 h-5 text-amber-600" />
-              <h3 className="font-bold text-slate-900 text-base">Pending Work</h3>
+              <CircleDashed className="w-4 h-4 text-[#71717A]" />
+              <h3 className="font-bold text-[#111111] text-sm uppercase tracking-wider">Pending Work</h3>
             </div>
-            <span className="text-xs font-mono font-bold text-amber-800 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+            <span className="text-xs font-mono font-bold text-[#111111] bg-[#F4F4F5] px-2 py-0.5 rounded border border-[#E4E4E7]">
               {progress.pendingTopics + progress.inProgressTopics} topics
             </span>
           </div>
@@ -278,15 +273,15 @@ export default function StudentProgress({ onSelectTopic }) {
                 <div
                   key={t.id}
                   onClick={() => onSelectTopic(t.id)}
-                  className="p-3 rounded-xl border border-slate-200 bg-white flex items-center justify-between hover:border-amber-300 hover:bg-amber-50/20 transition-colors cursor-pointer"
+                  className="p-3 rounded-lg border border-[#E4E4E7] bg-white flex items-center justify-between hover:border-[#111111] transition-colors cursor-pointer"
                 >
                   <div className="min-w-0 pr-2">
-                    <h4 className="text-xs font-bold text-slate-800 truncate">{t.title}</h4>
-                    <p className="text-[11px] text-slate-500 font-mono">
+                    <h4 className="text-xs font-bold text-[#111111] truncate">{t.title}</h4>
+                    <p className="text-[11px] text-[#71717A] font-mono">
                       Difficulty: {t.difficulty} • {t.estimated_duration_minutes}m
                     </p>
                   </div>
-                  <span className="text-xs font-semibold text-slate-500">Inspect</span>
+                  <span className="text-xs font-bold text-[#111111]">Inspect →</span>
                 </div>
               ))}
           </div>

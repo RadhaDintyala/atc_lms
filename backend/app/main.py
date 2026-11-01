@@ -2,11 +2,7 @@ from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import PlainTextResponse
 from app.core.config import settings
-from app.models.models import Base
-from app.db.session import engine
-
-# Create tables
-Base.metadata.create_all(bind=engine)
+from app.db.mongo import connect_to_mongo, close_mongo_connection
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -26,10 +22,18 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.on_event("startup")
+async def startup_db_client():
+    await connect_to_mongo()
+
+@app.on_event("shutdown")
+async def shutdown_db_client():
+    await close_mongo_connection()
+
 @app.get("/", tags=["Root"])
 def root():
     return {
-        "message": "Welcome to ApexLMS Engineering Project Roadmap API",
+        "message": "Welcome to Beacon Engineering Project Roadmap API",
         "docs": "/docs",
         "version": "1.0.0",
     }
@@ -38,6 +42,6 @@ def root():
 def health_check():
     return {
         "status": "healthy",
-        "service": "ApexLMS FastAPI Backend",
+        "service": "Beacon FastAPI Backend",
         "version": "1.0.0",
     }

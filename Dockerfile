@@ -1,18 +1,16 @@
-# Frontend Dockerfile
-FROM node:22-alpine AS builder
+# Full-Stack ApexLMS Container (Vite Frontend & Express API)
+FROM node:22-alpine
 
 WORKDIR /app
 
 COPY package*.json ./
-RUN npm ci
+RUN npm ci --legacy-peer-deps
 
 COPY . .
 RUN npm run build
 
-FROM nginx:alpine
-COPY --from=builder /app/dist /usr/share/nginx/html
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-
 EXPOSE 80
+ENV PORT=80
+ENV NODE_ENV=production
 
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["npx", "tsx", "server.ts"]

@@ -5,29 +5,29 @@ export default function StatusBadge({ status, type = 'status', className = '' })
 
   const normalized = status.toLowerCase();
 
-  let bg = 'bg-slate-100';
-  let text = 'text-slate-700';
-  let border = 'border-slate-200';
+  let bg = 'bg-[#F4F4F5]';
+  let text = 'text-[#111111]';
+  let border = 'border-[#E4E4E7]';
   let label = status;
 
   if (type === 'status' || type === 'topic') {
     switch (normalized) {
       case 'completed':
-        bg = 'bg-emerald-50';
-        text = 'text-emerald-700';
-        border = 'border-emerald-200';
+        bg = 'bg-[#111111]';
+        text = 'text-white';
+        border = 'border-[#111111]';
         label = 'Completed';
         break;
       case 'in_progress':
-        bg = 'bg-amber-50';
-        text = 'text-amber-800';
-        border = 'border-amber-200';
+        bg = 'bg-[#F9C321]';
+        text = 'text-[#111111]';
+        border = 'border-[#E5B01D]';
         label = 'In Progress';
         break;
       case 'not_started':
-        bg = 'bg-slate-100';
-        text = 'text-slate-600';
-        border = 'border-slate-200';
+        bg = 'bg-white';
+        text = 'text-[#71717A]';
+        border = 'border-[#E4E4E7]';
         label = 'Not Started';
         break;
       default:
@@ -35,35 +35,43 @@ export default function StatusBadge({ status, type = 'status', className = '' })
     }
   } else if (type === 'project') {
     switch (normalized) {
+      case 'completed':
       case 'approved':
-        bg = 'bg-emerald-50';
-        text = 'text-emerald-700';
-        border = 'border-emerald-200';
+        bg = 'bg-[#111111]';
+        text = 'text-white';
+        border = 'border-[#111111]';
         label = 'Approved';
         break;
       case 'under_review':
-        bg = 'bg-blue-50';
-        text = 'text-blue-700';
-        border = 'border-blue-200';
+        bg = 'bg-[#FEF9E6]';
+        text = 'text-[#111111]';
+        border = 'border-[#F5D365]';
         label = 'Under Review';
         break;
       case 'submitted':
-        bg = 'bg-cyan-50';
-        text = 'text-cyan-800';
-        border = 'border-cyan-200';
+        bg = 'bg-[#FEF9E6]';
+        text = 'text-[#111111]';
+        border = 'border-[#F5D365]';
         label = 'Submitted';
         break;
       case 'changes_requested':
-        bg = 'bg-rose-50';
-        text = 'text-rose-700';
-        border = 'border-rose-200';
+        bg = 'bg-[#F4F4F5]';
+        text = 'text-[#111111] font-bold';
+        border = 'border-[#111111]';
         label = 'Changes Requested';
         break;
+      case 'in_progress':
       case 'draft':
-        bg = 'bg-slate-100';
-        text = 'text-slate-600';
-        border = 'border-slate-200';
-        label = 'Draft';
+        bg = 'bg-[#F9C321]';
+        text = 'text-[#111111]';
+        border = 'border-[#E5B01D]';
+        label = normalized === 'draft' ? 'Draft' : 'In Progress';
+        break;
+      case 'not_started':
+        bg = 'bg-white';
+        text = 'text-[#71717A]';
+        border = 'border-[#E4E4E7]';
+        label = 'Not Started';
         break;
       default:
         break;
@@ -71,54 +79,54 @@ export default function StatusBadge({ status, type = 'status', className = '' })
   } else if (type === 'difficulty') {
     switch (normalized) {
       case 'beginner':
-        bg = 'bg-emerald-50';
-        text = 'text-emerald-700';
-        border = 'border-emerald-200';
+        bg = 'bg-[#F4F4F5]';
+        text = 'text-[#111111]';
+        border = 'border-[#E4E4E7]';
         label = 'Beginner';
         break;
       case 'intermediate':
-        bg = 'bg-amber-50';
-        text = 'text-amber-800';
-        border = 'border-amber-200';
+        bg = 'bg-[#FEF9E6]';
+        text = 'text-[#111111] font-semibold';
+        border = 'border-[#F5D365]';
         label = 'Intermediate';
         break;
       case 'advanced':
-        bg = 'bg-purple-50';
-        text = 'text-purple-700';
-        border = 'border-purple-200';
+        bg = 'bg-[#111111]';
+        text = 'text-white font-semibold';
+        border = 'border-[#111111]';
         label = 'Advanced';
         break;
     }
   } else if (type === 'account') {
     if (normalized === 'active') {
-      bg = 'bg-emerald-50';
-      text = 'text-emerald-700';
-      border = 'border-emerald-200';
+      bg = 'bg-[#111111]';
+      text = 'text-white';
+      border = 'border-[#111111]';
       label = 'Active';
     } else {
-      bg = 'bg-slate-100';
-      text = 'text-slate-500';
-      border = 'border-slate-300';
+      bg = 'bg-[#F4F4F5]';
+      text = 'text-[#71717A]';
+      border = 'border-[#E4E4E7]';
       label = 'Inactive';
     }
   } else if (type === 'track') {
     switch (normalized) {
       case 'common':
-        bg = 'bg-slate-100';
-        text = 'text-slate-800';
-        border = 'border-slate-300';
+        bg = 'bg-[#F4F4F5]';
+        text = 'text-[#111111]';
+        border = 'border-[#E4E4E7]';
         label = 'Common Foundation';
         break;
       case 'fullstack':
-        bg = 'bg-blue-50';
-        text = 'text-blue-800';
-        border = 'border-blue-200';
+        bg = 'bg-white';
+        text = 'text-[#111111] font-semibold';
+        border = 'border-[#111111]';
         label = 'Full-Stack & App Dev';
         break;
       case 'ai':
-        bg = 'bg-purple-50';
-        text = 'text-purple-800';
-        border = 'border-purple-200';
+        bg = 'bg-[#111111]';
+        text = 'text-[#F9C321] font-semibold';
+        border = 'border-[#111111]';
         label = 'AI Engineering';
         break;
     }
@@ -126,10 +134,10 @@ export default function StatusBadge({ status, type = 'status', className = '' })
 
   return (
     <span
-      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${bg} ${text} ${border} ${className}`}
+      className={`inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-medium border ${bg} ${text} ${border} ${className}`}
     >
-      <span className="w-1.5 h-1.5 rounded-full mr-1.5 bg-current opacity-75"></span>
-      {label}
+      <span className="w-1.5 h-1.5 rounded-full mr-1.5 bg-current opacity-80 shrink-0"></span>
+      <span>{label}</span>
     </span>
   );
 }

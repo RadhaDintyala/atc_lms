@@ -1,26 +1,190 @@
 @import "tailwindcss";
 
+@theme {
+  --color-brand-yellow: #F9C321;
+  --color-brand-yellow-hover: #E5B01D;
+  --color-brand-yellow-subtle: #FEF9E6;
+  --color-brand-yellow-border: #F5D365;
+  --color-brand-black: #111111;
+  --color-brand-charcoal: #1C1C1E;
+  --color-brand-dark-surface: #18181B;
+  --color-brand-dark-border: #2E2E32;
+  --color-brand-white: #FFFFFF;
+  --color-brand-bg: #F8F9FA;
+  --color-brand-border: #E4E4E7;
+  --color-brand-border-subtle: #EDEDF0;
+  --color-brand-text: #111111;
+  --color-brand-muted: #71717A;
+}
+
+:root {
+  --brand-yellow: #F9C321;
+  --brand-yellow-hover: #E5B01D;
+  --brand-yellow-subtle: #FEF9E6;
+  --brand-yellow-border: #F5D365;
+  --brand-black: #111111;
+  --brand-charcoal: #1C1C1E;
+  --brand-dark-surface: #18181B;
+  --brand-dark-border: #2E2E32;
+  --brand-white: #FFFFFF;
+  --brand-bg: #F8F9FA;
+  --brand-border: #E4E4E7;
+  --brand-border-subtle: #EDEDF0;
+  --brand-text: #111111;
+  --brand-muted: #71717A;
+}
+
 @layer base {
   body {
-    background-color: #f8fafc;
-    color: #0f172a;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    background-color: var(--brand-bg);
+    color: var(--brand-text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  ::selection {
+    background-color: #F9C321;
+    color: #111111;
   }
 }
 
-/* Custom scrollbar for clean dashboard view */
+/* Disciplined Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #f1f5f9;
+  background: #F1F1F4;
 }
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 3px;
+  background: #D4D4D8;
+  border-radius: 2px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: #A1A1AA;
+}
+
+/* Reusable UI Utility Classes for Consistent System */
+.btn-primary {
+  background-color: #F9C321;
+  color: #111111;
+  font-weight: 700;
+  font-size: 0.8125rem;
+  line-height: 1.25rem;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid #E5B01D;
+  transition: all 0.15s ease-in-out;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+.btn-primary:hover:not(:disabled) {
+  background-color: #E5B01D;
+  border-color: #CFA015;
+}
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-dark {
+  background-color: #111111;
+  color: #FFFFFF;
+  font-weight: 600;
+  font-size: 0.8125rem;
+  line-height: 1.25rem;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid #111111;
+  transition: all 0.15s ease-in-out;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+.btn-dark:hover:not(:disabled) {
+  background-color: #262626;
+  border-color: #262626;
+}
+.btn-dark:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background-color: #FFFFFF;
+  color: #111111;
+  font-weight: 600;
+  font-size: 0.8125rem;
+  line-height: 1.25rem;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid #E4E4E7;
+  transition: all 0.15s ease-in-out;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+.btn-secondary:hover:not(:disabled) {
+  background-color: #F4F4F5;
+  border-color: #D4D4D8;
+}
+.btn-secondary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-ghost {
+  background-color: transparent;
+  color: #71717A;
+  font-weight: 500;
+  font-size: 0.8125rem;
+  line-height: 1.25rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  border: 1px solid transparent;
+  transition: all 0.15s ease-in-out;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+.btn-ghost:hover:not(:disabled) {
+  color: #111111;
+  background-color: #F4F4F5;
+}
+
+.input-standard {
+  background-color: #FFFFFF;
+  border: 1px solid #E4E4E7;
+  color: #111111;
+  font-size: 0.8125rem;
+  line-height: 1.25rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+.input-standard:focus {
+  outline: none;
+  border-color: #111111;
+  box-shadow: 0 0 0 1px #111111;
+}
+.input-standard::placeholder {
+  color: #A1A1AA;
+}
+
+.card-standard {
+  background-color: #FFFFFF;
+  border: 1px solid #E4E4E7;
+  border-radius: 0.75rem;
+  padding: 1.25rem;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
 }

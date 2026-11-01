@@ -46,7 +46,7 @@ export default function ProgressReports() {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `apexlms_student_progress_report_${new Date().toISOString().split('T')[0]}.csv`;
+      a.download = `beacon_student_progress_report_${new Date().toISOString().split('T')[0]}.csv`;
       document.body.appendChild(a);
       a.click();
       a.remove();
@@ -62,8 +62,8 @@ export default function ProgressReports() {
     return (
       <div className="p-8 flex items-center justify-center min-h-[400px]">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 border-3 border-amber-400 border-t-transparent rounded-full animate-spin"></div>
-          <p className="text-sm text-slate-500 font-medium">Generating academic audit reports...</p>
+          <div className="w-8 h-8 border-3 border-[#F9C321] border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-sm text-[#71717A] font-medium">Generating academic audit reports...</p>
         </div>
       </div>
     );
@@ -72,12 +72,12 @@ export default function ProgressReports() {
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
       {/* Header & Export Action */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#E4E4E7]">
         <div>
-          <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">
+          <h1 className="text-2xl font-black text-[#111111] tracking-tight">
             Academic Reports & Analytics
           </h1>
-          <p className="text-xs sm:text-sm text-slate-500 mt-1">
+          <p className="text-xs sm:text-sm text-[#71717A] mt-1 font-normal">
             Cohort performance, topic completion records, and official CSV progress audit export.
           </p>
         </div>
@@ -85,9 +85,9 @@ export default function ProgressReports() {
         <button
           onClick={handleDownloadCSV}
           disabled={downloading}
-          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-amber-300 text-xs font-bold transition-all shadow-xs"
+          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[#111111] hover:bg-black text-[#F9C321] text-xs font-bold transition-all shadow-xs"
         >
-          <Download className="w-4 h-4" />
+          <Download className="w-4 h-4 text-[#F9C321]" />
           <span>{downloading ? 'Generating CSV...' : 'Export Progress Report (CSV)'}</span>
         </button>
       </div>
@@ -97,10 +97,10 @@ export default function ProgressReports() {
         <StatCard
           title="Average Cohort Progress"
           value={`${analytics.averageCompletion}%`}
-          subtitle="Computed across all students"
+          subtitle="Computed across all registered students"
           icon={TrendingUp}
           badge="Cohort Benchmark"
-          badgeColor="emerald"
+          badgeColor="yellow"
         />
         <StatCard
           title="Total Registered Students"
@@ -108,35 +108,35 @@ export default function ProgressReports() {
           subtitle={`${analytics.activeStudents} currently active accounts`}
           icon={Users}
           badge="100% Tracked"
-          badgeColor="slate"
+          badgeColor="dark"
         />
         <StatCard
           title="Inactive Students (>14d)"
           value={analytics.inactiveStudents?.length || 0}
           subtitle="Flagged for mentor outreach"
           icon={AlertTriangle}
-          badge="Requires Follow-up"
-          badgeColor={analytics.inactiveStudents?.length > 0 ? 'rose' : 'slate'}
+          badge="Needs Outreach"
+          badgeColor={analytics.inactiveStudents?.length > 0 ? 'yellow' : 'neutral'}
         />
       </div>
 
       {/* Cohort Progress Breakdown Table */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
-        <div className="p-5 border-b border-slate-200 flex items-center justify-between">
+      <div className="bg-white rounded-xl border border-[#E4E4E7] shadow-2xs overflow-hidden">
+        <div className="p-5 border-b border-[#E4E4E7] flex items-center justify-between">
           <div>
-            <h3 className="font-bold text-slate-900 text-base">Individual Student Progress Roll</h3>
-            <p className="text-xs text-slate-500">
+            <h3 className="font-bold text-[#111111] text-base">Individual Student Progress Roll</h3>
+            <p className="text-xs text-[#71717A] mt-0.5">
               Verified topic completions and required milestone metrics per student.
             </p>
           </div>
-          <span className="text-xs font-mono font-bold text-slate-600 bg-slate-100 px-2.5 py-1 rounded-md">
+          <span className="text-xs font-mono font-bold text-[#111111] bg-[#F4F4F5] border border-[#E4E4E7] px-2.5 py-1 rounded-md">
             {students.length} Total Records
           </span>
         </div>
 
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-semibold uppercase tracking-wider">
+            <thead className="bg-[#FAFAFA] border-b border-[#E4E4E7] text-[#71717A] text-[11px] font-bold uppercase tracking-wider">
               <tr>
                 <th className="px-5 py-3.5">Student</th>
                 <th className="px-4 py-3.5">Year & Track</th>
@@ -146,27 +146,27 @@ export default function ProgressReports() {
                 <th className="px-5 py-3.5">Last Active</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-[#F4F4F5]">
               {students.map((st) => (
-                <tr key={st.id} className="hover:bg-slate-50/70 transition-colors">
+                <tr key={st.id} className="hover:bg-[#FAFAFA] transition-colors">
                   <td className="px-5 py-4">
-                    <p className="font-bold text-slate-900 text-xs">{st.full_name}</p>
-                    <p className="text-[11px] text-slate-500 font-mono">
+                    <p className="font-bold text-[#111111] text-xs">{st.full_name}</p>
+                    <p className="text-[11px] text-[#71717A] font-mono">
                       {st.roll_number} • {st.email}
                     </p>
                   </td>
 
                   <td className="px-4 py-4">
-                    <span className="font-semibold text-slate-800 block">
+                    <span className="font-bold text-[#111111] block">
                       {st.current_year === 'year_1' ? '1st Year' : st.current_year === 'year_2' ? '2nd Year' : '3rd Year'}
                     </span>
-                    <span className="text-[10px] text-slate-500 capitalize">{st.track_id}</span>
+                    <span className="text-[10px] text-[#71717A] capitalize font-medium">{st.track_id}</span>
                   </td>
 
-                  <td className="px-4 py-4 w-44">
+                  <td className="px-4 py-4 w-48">
                     <div className="space-y-1">
                       <div className="flex justify-between items-center text-[11px]">
-                        <span className="font-bold font-mono text-slate-900">
+                        <span className="font-mono font-bold text-[#111111]">
                           {st.progress?.overallPercentage || 0}%
                         </span>
                       </div>
@@ -179,15 +179,15 @@ export default function ProgressReports() {
                     </div>
                   </td>
 
-                  <td className="px-4 py-4 font-mono text-slate-700">
+                  <td className="px-4 py-4 font-mono text-[#111111] font-semibold">
                     {st.progress?.completedRequiredTopics || 0} / {st.progress?.totalRequiredTopics || 0}
                   </td>
 
-                  <td className="px-4 py-4 font-mono text-slate-700">
-                    <span className="font-bold text-emerald-700">{st.approved_projects_count}</span> approved / {st.projects_count} total
+                  <td className="px-4 py-4 font-mono text-[#71717A]">
+                    <span className="font-bold text-[#111111]">{st.approved_projects_count}</span> approved / {st.projects_count} total
                   </td>
 
-                  <td className="px-5 py-4 font-mono text-slate-500 text-[11px]">
+                  <td className="px-5 py-4 font-mono text-[#71717A] text-[11px]">
                     {st.last_active_at ? new Date(st.last_active_at).toLocaleDateString() : 'N/A'}
                   </td>
                 </tr>

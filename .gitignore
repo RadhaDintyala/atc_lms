@@ -4,5 +4,11 @@ dist/
 coverage/
 .DS_Store
 *.log
-.env*
+
+# Environment files – keep only the example template
+.env
+.env.*
 !.env.example
+
+# JSON file database – contains real user data, do not commit
+data/db.json

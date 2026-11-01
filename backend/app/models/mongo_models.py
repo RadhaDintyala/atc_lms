@@ -63,7 +63,7 @@ class MongoStudentProfile(BaseModel):
     id: str = Field(..., alias="_id")
     user_id: str
     roll_number: str
-    college: str = "Apex Institute of Technology"
+    college: str = "Beacon Institute of Technology"
     department: str
     current_year: EngineeringYear = EngineeringYear.YEAR_1
     track_id: SpecializationTrack = SpecializationTrack.COMMON

@@ -6,50 +6,61 @@ export default function StatCard({
   subtitle,
   icon: Icon,
   badge,
-  badgeColor = 'amber',
+  badgeColor = 'neutral',
   onClick,
   className = '',
 }) {
-  const badgeClasses = {
-    amber: 'bg-amber-50 text-amber-800 border-amber-200',
-    cyan: 'bg-cyan-50 text-cyan-800 border-cyan-200',
-    emerald: 'bg-emerald-50 text-emerald-800 border-emerald-200',
-    purple: 'bg-purple-50 text-purple-800 border-purple-200',
-    rose: 'bg-rose-50 text-rose-800 border-rose-200',
-    slate: 'bg-slate-100 text-slate-700 border-slate-200',
+  const getBadgeClass = (color) => {
+    switch (color) {
+      case 'amber':
+      case 'yellow':
+        return 'bg-[#F9C321] text-[#111111] border-[#E5B01D] font-bold';
+      case 'emerald':
+      case 'dark':
+      case 'black':
+        return 'bg-[#111111] text-white border-[#111111] font-semibold';
+      case 'cyan':
+      case 'blue':
+      case 'purple':
+      case 'rose':
+      case 'slate':
+      case 'neutral':
+      default:
+        return 'bg-[#F4F4F5] text-[#111111] border-[#E4E4E7] font-semibold';
+    }
   };
 
   return (
     <div
       onClick={onClick}
-      className={`bg-white rounded-xl border border-slate-200/90 p-5 shadow-xs transition-all hover:shadow-md ${
-        onClick ? 'cursor-pointer hover:border-slate-300' : ''
+      className={`bg-white rounded-xl border border-[#E4E4E7] p-5 shadow-xs transition-all hover:border-[#111111] ${
+        onClick ? 'cursor-pointer' : ''
       } ${className}`}
     >
-      <div className="flex items-start justify-between">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0 flex-1">
+          <p className="text-[11px] font-bold uppercase tracking-wider text-[#71717A] mb-1.5 truncate">
             {title}
           </p>
-          <div className="flex items-baseline space-x-2">
-            <span className="text-2xl font-bold tracking-tight text-slate-900">
+          <div className="flex items-baseline gap-2 flex-wrap">
+            <span className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#111111] font-mono leading-none">
               {value}
             </span>
             {badge && (
-              <span className={`text-xs px-2 py-0.5 rounded-full font-medium border ${badgeClasses[badgeColor] || badgeClasses.amber}`}>
+              <span className={`text-[11px] px-2 py-0.5 rounded-md border ${getBadgeClass(badgeColor)}`}>
                 {badge}
               </span>
             )}
           </div>
           {subtitle && (
-            <p className="text-xs text-slate-500 mt-1.5 flex items-center gap-1">
+            <p className="text-xs text-[#71717A] mt-2 flex items-center gap-1 line-clamp-1">
               {subtitle}
             </p>
           )}
         </div>
         {Icon && (
-          <div className="p-2.5 rounded-lg bg-amber-50 text-amber-700 border border-amber-100 shrink-0">
-            <Icon className="w-5 h-5" />
+          <div className="w-9 h-9 rounded-lg bg-[#FEF9E6] text-[#111111] border border-[#F5D365]/60 flex items-center justify-center shrink-0">
+            <Icon className="w-4 h-4 text-[#111111]" />
           </div>
         )}
       </div>

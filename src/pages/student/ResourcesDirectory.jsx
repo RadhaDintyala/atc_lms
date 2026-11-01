@@ -11,7 +11,6 @@ import {
   Video,
   Code,
   GraduationCap,
-  Sparkles,
   Info,
 } from 'lucide-react';
 
@@ -76,13 +75,13 @@ export default function ResourcesDirectory() {
   const getResourceIcon = (type) => {
     switch (type) {
       case 'Video':
-        return <Video className="w-4 h-4 text-rose-500" />;
+        return <Video className="w-4 h-4 text-[#111111]" />;
       case 'Course':
-        return <GraduationCap className="w-4 h-4 text-purple-500" />;
+        return <GraduationCap className="w-4 h-4 text-[#111111]" />;
       case 'Repository':
-        return <Code className="w-4 h-4 text-emerald-500" />;
+        return <Code className="w-4 h-4 text-[#111111]" />;
       default:
-        return <FileText className="w-4 h-4 text-blue-500" />;
+        return <FileText className="w-4 h-4 text-[#111111]" />;
     }
   };
 
@@ -109,33 +108,33 @@ export default function ResourcesDirectory() {
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#E4E4E7]">
         <div>
-          <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">
+          <h1 className="text-2xl font-extrabold text-[#111111] tracking-tight">
             Learning Resources Library
           </h1>
-          <p className="text-xs sm:text-sm text-slate-500 mt-1">
+          <p className="text-xs sm:text-sm text-[#71717A] mt-1">
             Documentation, official tutorials, interactive courses, and repositories across all engineering tracks.
           </p>
         </div>
 
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-amber-50 text-amber-900 border border-amber-200 text-xs">
-          <Info className="w-4 h-4 text-amber-600 shrink-0" />
+        <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#FEF9E6] text-[#111111] border border-[#F5D365] text-xs font-medium">
+          <Info className="w-4 h-4 text-[#111111] shrink-0" />
           <span>Opening links does not auto-complete resources. Click checkbox to track.</span>
         </div>
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs space-y-3">
+      <div className="bg-white p-4 rounded-xl border border-[#E4E4E7] shadow-xs space-y-3">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           <div className="relative">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+            <Search className="w-4 h-4 text-[#71717A] absolute left-3 top-2.5" />
             <input
               type="text"
               placeholder="Search resources, topics, tools..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-hidden focus:border-amber-400 focus:ring-2 focus:ring-amber-200/50"
+              className="w-full pl-9 pr-3 py-2 text-xs rounded-lg border border-[#E4E4E7] focus:outline-none focus:border-[#111111] text-[#111111] placeholder-[#71717A]"
             />
           </div>
 
@@ -143,15 +142,14 @@ export default function ResourcesDirectory() {
             <select
               value={typeFilter}
               onChange={(e) => setTypeFilter(e.target.value)}
-              className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-hidden focus:border-amber-400 focus:ring-2 focus:ring-amber-200/50 bg-white"
+              className="w-full px-3 py-2 text-xs rounded-lg border border-[#E4E4E7] focus:outline-none focus:border-[#111111] bg-white text-[#111111]"
             >
-              <option value="all">All Resource Types</option>
+              <option value="all">All Content Types</option>
               <option value="Documentation">Documentation</option>
               <option value="Tutorial">Tutorial</option>
-              <option value="Course">Course</option>
-              <option value="Video">Video</option>
-              <option value="Repository">Repository</option>
-              <option value="Practice">Practice</option>
+              <option value="Video">Video Course</option>
+              <option value="Repository">Repository / Code</option>
+              <option value="Course">Full Course</option>
             </select>
           </div>
 
@@ -159,9 +157,9 @@ export default function ResourcesDirectory() {
             <select
               value={difficultyFilter}
               onChange={(e) => setDifficultyFilter(e.target.value)}
-              className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-hidden focus:border-amber-400 focus:ring-2 focus:ring-amber-200/50 bg-white"
+              className="w-full px-3 py-2 text-xs rounded-lg border border-[#E4E4E7] focus:outline-none focus:border-[#111111] bg-white text-[#111111]"
             >
-              <option value="all">All Difficulty Levels</option>
+              <option value="all">All Difficulties</option>
               <option value="Beginner">Beginner</option>
               <option value="Intermediate">Intermediate</option>
               <option value="Advanced">Advanced</option>
@@ -172,20 +170,20 @@ export default function ResourcesDirectory() {
             <select
               value={completionFilter}
               onChange={(e) => setCompletionFilter(e.target.value)}
-              className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-hidden focus:border-amber-400 focus:ring-2 focus:ring-amber-200/50 bg-white"
+              className="w-full px-3 py-2 text-xs rounded-lg border border-[#E4E4E7] focus:outline-none focus:border-[#111111] bg-white text-[#111111]"
             >
               <option value="all">All Statuses</option>
-              <option value="completed">Completed Only</option>
-              <option value="uncompleted">Uncompleted Only</option>
+              <option value="uncompleted">To Study (Pending)</option>
+              <option value="completed">Completed by Me</option>
             </select>
           </div>
         </div>
 
-        <div className="flex items-center justify-between pt-2 border-t border-slate-100 text-xs">
-          <span className="text-slate-500">
-            Showing <span className="font-bold text-slate-800">{filteredResources.length}</span> resources
-          </span>
-          {(searchQuery || typeFilter !== 'all' || difficultyFilter !== 'all' || completionFilter !== 'all') && (
+        {(searchQuery || typeFilter !== 'all' || difficultyFilter !== 'all' || completionFilter !== 'all') && (
+          <div className="flex items-center justify-between pt-2 border-t border-[#E4E4E7] text-xs">
+            <span className="text-[#71717A]">
+              Showing <span className="font-bold text-[#111111]">{filteredResources.length}</span> matching resources
+            </span>
             <button
               onClick={() => {
                 setSearchQuery('');
@@ -193,25 +191,28 @@ export default function ResourcesDirectory() {
                 setDifficultyFilter('all');
                 setCompletionFilter('all');
               }}
-              className="text-amber-700 font-semibold hover:underline"
+              className="text-[#111111] font-bold hover:underline cursor-pointer"
             >
               Reset Filters
             </button>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
       {/* Resources Table/Grid */}
       {loading ? (
-        <div className="p-8 text-center text-xs text-slate-500">Loading resources library...</div>
+        <div className="p-12 text-center text-xs text-[#71717A] flex flex-col items-center gap-2">
+          <div className="w-8 h-8 border-2 border-[#F9C321] border-t-transparent rounded-full animate-spin" />
+          <span>Loading resources library...</span>
+        </div>
       ) : filteredResources.length === 0 ? (
-        <div className="p-12 text-center bg-white rounded-2xl border border-dashed border-slate-300">
-          <BookOpen className="w-10 h-10 text-slate-400 mx-auto mb-3" />
-          <p className="text-sm font-semibold text-slate-800">No resources found</p>
-          <p className="text-xs text-slate-500 mt-1">Try adjusting your filters or search keywords.</p>
+        <div className="p-12 text-center bg-white rounded-xl border border-dashed border-[#E4E4E7]">
+          <BookOpen className="w-10 h-10 text-[#71717A] mx-auto mb-3" />
+          <p className="text-sm font-bold text-[#111111]">No resources found</p>
+          <p className="text-xs text-[#71717A] mt-1">Try adjusting your filters or search keywords.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
           {filteredResources.map((res) => {
             const isCompleted = resourceProgressMap.get(res.id) === 'completed';
             const isUpdating = updatingId === res.id;
@@ -219,21 +220,21 @@ export default function ResourcesDirectory() {
             return (
               <div
                 key={res.id}
-                className={`p-5 rounded-2xl border transition-all flex flex-col justify-between ${
+                className={`p-4 rounded-xl border transition-all flex flex-col justify-between ${
                   isCompleted
-                    ? 'bg-emerald-50/30 border-emerald-200'
-                    : 'bg-white border-slate-200/90 hover:border-slate-300 shadow-2xs'
+                    ? 'bg-[#FAFAFA] border-[#E4E4E7] border-l-4 border-l-[#111111]'
+                    : 'bg-white border-[#E4E4E7] hover:border-[#111111] shadow-xs'
                 }`}
               >
                 <div>
                   <div className="flex items-start justify-between gap-3 mb-2">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-700">
+                      <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#111111]">
                         {getResourceIcon(res.type)}
                         {res.type}
                       </span>
                       <StatusBadge status={res.difficulty} type="difficulty" />
-                      <span className="text-[11px] text-slate-400 font-mono">
+                      <span className="text-[11px] text-[#71717A] font-mono">
                         {res.duration_minutes}m
                       </span>
                     </div>
@@ -241,29 +242,29 @@ export default function ResourcesDirectory() {
                     <button
                       onClick={() => handleToggleResource(res.id)}
                       disabled={isUpdating}
-                      className={`w-6 h-6 rounded-lg border flex items-center justify-center transition-all ${
+                      className={`w-5 h-5 rounded border flex items-center justify-center transition-all cursor-pointer ${
                         isCompleted
-                          ? 'bg-emerald-600 border-emerald-600 text-white'
-                          : 'border-slate-300 bg-white hover:border-amber-500'
+                          ? 'bg-[#111111] border-[#111111] text-white'
+                          : 'border-[#D4D4D8] bg-white hover:border-[#111111]'
                       }`}
                       title={isCompleted ? 'Mark incomplete' : 'Mark completed'}
                     >
-                      {isCompleted && <Check className="w-4 h-4 stroke-[3]" />}
+                      {isCompleted && <Check className="w-3.5 h-3.5 stroke-[3]" />}
                     </button>
                   </div>
 
-                  <h3 className="text-base font-bold text-slate-900 mb-1 leading-snug">
+                  <h3 className="text-sm font-bold text-[#111111] mb-1 leading-snug">
                     {res.title}
                   </h3>
-                  <p className="text-xs text-slate-600 line-clamp-2 mb-3">
+                  <p className="text-xs text-[#52525B] line-clamp-2 mb-3">
                     {res.description}
                   </p>
                 </div>
 
-                <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
+                <div className="pt-3 border-t border-[#E4E4E7] flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     {res.is_sample && (
-                      <span className="text-[10px] text-slate-500 bg-slate-100 px-2 py-0.5 rounded font-mono">
+                      <span className="text-[10px] text-[#111111] bg-[#FEF9E6] px-2 py-0.5 rounded font-mono border border-[#F5D365]">
                         Sample Link
                       </span>
                     )}
@@ -272,10 +273,10 @@ export default function ResourcesDirectory() {
                     href={res.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-800 text-xs font-semibold transition-colors shadow-2xs"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#E4E4E7] bg-white hover:bg-[#F4F4F5] text-[#111111] text-xs font-bold transition-colors"
                   >
                     <span>Launch Resource</span>
-                    <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
+                    <ExternalLink className="w-3.5 h-3.5 text-[#71717A]" />
                   </a>
                 </div>
               </div>
