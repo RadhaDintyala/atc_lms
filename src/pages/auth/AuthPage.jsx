@@ -41,16 +41,12 @@ export default function AuthPage() {
   const handleRoleSelect = (selectedRole) => {
     setRole(selectedRole);
     setErrorMsg(null);
+    setSignInEmail('');
+    setSignInPassword('');
 
     if (selectedRole === 'admin') {
-      // Admin only gets login (no signup) and credentials enabled
+      // Admin only gets login (no signup) and credentials are typed manually
       setMode('signin');
-      setSignInEmail('beacon.atc@gmail.om');
-      setSignInPassword('test@beacon.com');
-    } else {
-      // Student gets clean inputs
-      setSignInEmail('');
-      setSignInPassword('');
     }
   };
 
@@ -215,9 +211,11 @@ export default function AuthPage() {
             <form onSubmit={handleSignIn} className="space-y-4">
               {/* Admin credentials info banner */}
               {role === 'admin' && (
-                <div className="p-3 rounded-lg bg-[#1F1D13] border border-[#524410] text-xs">
-                  
-                  
+                <div className="p-2.5 rounded-lg bg-[#1F1D13] border border-[#524410] text-xs flex items-center gap-2">
+                  <ShieldCheck className="w-4 h-4 text-[#F9C321] shrink-0" />
+                  <span className="text-[11px] text-[#D4D4D8]">
+                    Enter authorized Super Admin credentials to access the command center.
+                  </span>
                 </div>
               )}
 
@@ -234,7 +232,7 @@ export default function AuthPage() {
                     required
                     value={signInEmail}
                     onChange={(e) => setSignInEmail(e.target.value)}
-                    placeholder={role === 'admin' ? 'beacon.atc@gmail.om' : 'name@university.edu'}
+                    placeholder={role === 'admin' ? 'Enter admin email (e.g. beacon.atc@gmail.om)' : 'Enter student email (e.g. name@university.edu)'}
                     className="w-full pl-9 pr-3 py-2 rounded-lg bg-[#111111] border border-[#333333] text-white placeholder-[#71717A] text-xs focus:outline-none focus:border-[#F9C321] focus:ring-1 focus:ring-[#F9C321] transition-colors"
                   />
                 </div>
@@ -253,7 +251,7 @@ export default function AuthPage() {
                     required
                     value={signInPassword}
                     onChange={(e) => setSignInPassword(e.target.value)}
-                    placeholder="Enter your password"
+                    placeholder={role === 'admin' ? 'Enter admin password' : 'Enter your password'}
                     className="w-full pl-9 pr-3 py-2 rounded-lg bg-[#111111] border border-[#333333] text-white placeholder-[#71717A] text-xs focus:outline-none focus:border-[#F9C321] focus:ring-1 focus:ring-[#F9C321] transition-colors"
                   />
                 </div>

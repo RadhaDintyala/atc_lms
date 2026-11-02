@@ -48,7 +48,7 @@ Beacon is a modern, production-grade Learning Management System (LMS) engineered
 - **Project Submission Pipeline**: Submit live GitHub repository and preview URLs tied directly to curriculum topics. Automatic submission confirmation and review workflow.
 
 ### 🛡️ Admin & Mentor Command Center
-- **Pre-configured Super Admin Access**: Secure administrative portal with single-click prefilled credentials.
+- **Dedicated Super Admin Access**: Secure administrative portal restricted to verified administrator accounts.
 - **Project Review Queue**: Review pending student submissions, approve or reject with mentor feedback notes, and award completion credit.
 - **Student Dossier & Analytics**: Monitor student progress percentage, active topics, approved projects, and perform permanent account deletions.
 - **Curriculum Content Management**: Add, modify, or archive topics and resources dynamically.
@@ -73,7 +73,7 @@ The administrative portal is protected and restricts access to authenticated men
 | **Password** | `test@beacon.com` |
 
 > [!NOTE]
-> When the **Admin** tab is selected on the login page, account registration is disabled and the Super Admin credentials are automatically pre-filled for convenience.
+> When the **Admin** tab is selected on the login page, account registration is disabled. Super Admin credentials are **not** auto-filled; administrators must manually type their authorized email and password into the respective input fields.
 
 ---
 
