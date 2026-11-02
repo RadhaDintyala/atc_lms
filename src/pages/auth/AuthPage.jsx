@@ -216,29 +216,8 @@ export default function AuthPage() {
               {/* Admin credentials info banner */}
               {role === 'admin' && (
                 <div className="p-3 rounded-lg bg-[#1F1D13] border border-[#524410] text-xs">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="font-bold text-[#F9C321] flex items-center gap-1.5">
-                      <BadgeCheck className="w-4 h-4 text-[#F9C321]" />
-                      Super Admin Credentials Enabled
-                    </span>
-                    <span className="text-[10px] bg-[#F9C321]/20 text-[#F9C321] px-1.5 py-0.5 rounded font-mono font-bold">
-                      ADMIN
-                    </span>
-                  </div>
-                  <div className="text-[11px] text-[#D4D4D8] space-y-1 font-mono">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[#A1A1AA]">Name:</span>
-                      <span className="text-white font-semibold">Super Admin</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-[#A1A1AA]">Mail:</span>
-                      <span className="text-[#F9C321] font-semibold">beacon.atc@gmail.om</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-[#A1A1AA]">Password:</span>
-                      <span className="text-zinc-300">test@beacon.com</span>
-                    </div>
-                  </div>
+                  
+                  
                 </div>
               )}
 
