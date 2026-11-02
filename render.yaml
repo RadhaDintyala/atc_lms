@@ -11,8 +11,11 @@ services:
       - key: NODE_VERSION
         value: "20"
       - key: JWT_SECRET
-        generateValue: true        # Render auto-generates a secret on first deploy
+        generateValue: true
       - key: MONGO_URI
-        sync: false                # Paste your MongoDB Atlas URI here in the Render dashboard
+        sync: false
+        # In Render Dashboard → Environment, set this to:
+        # mongodb+srv://dintyalaradhakalyani_db_user:<password>@cluster0.blxmown.mongodb.net/atc_lms?retryWrites=true&w=majority
       - key: FRONTEND_URL
-        sync: false                # Set to your Vercel URL (e.g. https://atc-lms.vercel.app)
+        sync: false
+        # Set to your Vercel URL after deploying frontend, e.g.: https://atc-lms.vercel.app
