@@ -61,6 +61,7 @@ class DBStore {
         this.db = parsed;
         this.syncProjectTopicProgress();
         this.ensureSuperAdmin();
+        this.purgeSeedStudentsAndProjects();
         this.saveToDisk(this.db);
         return this.db;
       } catch (err) {
@@ -72,6 +73,7 @@ class DBStore {
     this.db = initialData;
     this.syncProjectTopicProgress();
     this.ensureSuperAdmin();
+    this.purgeSeedStudentsAndProjects();
     this.saveToDisk(this.db);
     return this.db;
   }
@@ -101,6 +103,87 @@ class DBStore {
       }
     }
   }
+
+  public purgeSeedStudentsAndProjects(): void {
+    if (!this.db) return;
+
+    const purgedEmails = new Set([
+      'alex.rivers@beacon.edu',
+      'priya.patel@beacon.edu',
+      'marcus.vance@beacon.edu',
+      'elena.rostova@beacon.edu',
+      'devon.lane@beacon.edu',
+      'radhaaadintyala@gmail.com',
+      'example@gmail.com',
+      'mentor.admin@beacon.edu',
+    ]);
+
+    const purgedRolls = new Set([
+      'ENG2026-0142',
+      'ENG2025-0089',
+      'ENG2025-0215',
+      'ENG2024-0033',
+      'ENG2025-0371',
+      'ENG2026-7326',
+      'ENG2026-3243',
+    ]);
+
+    // Find all user IDs to remove
+    const removedUserIds = new Set(
+      (this.db.users || [])
+        .filter((u) => purgedEmails.has(u.email.toLowerCase()))
+        .map((u) => u.id)
+    );
+
+    // Find all profile IDs to remove
+    const removedProfileIds = new Set(
+      (this.db.profiles || [])
+        .filter((p) => removedUserIds.has(p.user_id) || purgedRolls.has(p.roll_number))
+        .map((p) => p.id)
+    );
+
+    // Filter out users
+    this.db.users = (this.db.users || []).filter((u) => !purgedEmails.has(u.email.toLowerCase()));
+
+    // Filter out profiles
+    this.db.profiles = (this.db.profiles || []).filter(
+      (p) => !removedProfileIds.has(p.id) && !purgedRolls.has(p.roll_number) && !removedUserIds.has(p.user_id)
+    );
+
+    // Filter out seed projects
+    const seedProjectIds = new Set(['proj-001', 'proj-002']);
+    this.db.projects = (this.db.projects || []).filter(
+      (p) => !seedProjectIds.has(p.id) && !removedProfileIds.has(p.student_id)
+    );
+
+    // Filter out progress and activity logs for removed students
+    this.db.topicProgress = (this.db.topicProgress || []).filter(
+      (tp) => !removedProfileIds.has(tp.student_id)
+    );
+    this.db.resourceProgress = (this.db.resourceProgress || []).filter(
+      (rp) => !removedProfileIds.has(rp.student_id)
+    );
+    this.db.activityLogs = (this.db.activityLogs || []).filter(
+      (l) => !removedProfileIds.has(l.student_id)
+    );
+  }
+
+  public deleteStudent(profileId: string) {
+    const profile = this.db.profiles.find((p) => p.id === profileId);
+    if (!profile) throw new Error('Student profile not found');
+
+    const userId = profile.user_id;
+    this.db.users = this.db.users.filter((u) => u.id !== userId);
+    this.db.profiles = this.db.profiles.filter((p) => p.id !== profileId);
+    this.db.projects = this.db.projects.filter((p) => p.student_id !== profileId);
+    this.db.topicProgress = this.db.topicProgress.filter((tp) => tp.student_id !== profileId);
+    this.db.resourceProgress = this.db.resourceProgress.filter((rp) => rp.student_id !== profileId);
+    this.db.activityLogs = this.db.activityLogs.filter((l) => l.student_id !== profileId);
+
+    this.saveToDisk();
+    return { success: true };
+  }
+
 
   private syncProjectTopicProgress(): void {
     if (!this.db?.projects || !this.db?.topicProgress) return;
@@ -177,6 +260,7 @@ class DBStore {
           this.db = (stateDoc as any).data as DatabaseSchema;
           this.syncProjectTopicProgress();
           this.ensureSuperAdmin();
+          this.purgeSeedStudentsAndProjects();
           try {
             fs.writeFileSync(DB_FILE, JSON.stringify(this.db, null, 2), 'utf-8');
           } catch {}

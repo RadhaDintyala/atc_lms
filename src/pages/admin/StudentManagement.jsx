@@ -17,6 +17,7 @@ import {
   ChevronLeft,
   ChevronRight,
   AlertCircle,
+  Trash2,
 } from 'lucide-react';
 
 export default function StudentManagement() {
@@ -130,6 +131,20 @@ export default function StudentManagement() {
       await loadStudents();
     } catch (err) {
       alert(`Error updating student status: ${err.message}`);
+    }
+  };
+
+  const handleDeleteStudent = async (st) => {
+    const confirmed = window.confirm(
+      `Are you sure you want to permanently delete student "${st.full_name}" (${st.roll_number})? This cannot be undone.`
+    );
+    if (!confirmed) return;
+
+    try {
+      await api.deleteStudent(st.id);
+      await loadStudents();
+    } catch (err) {
+      alert(`Error deleting student: ${err.message}`);
     }
   };
 
@@ -394,6 +409,13 @@ export default function StudentManagement() {
                           ) : (
                             <CheckCircle className="w-4 h-4" />
                           )}
+                        </button>
+                        <button
+                          onClick={() => handleDeleteStudent(st)}
+                          className="p-1.5 rounded-lg border border-[#E4E4E7] text-red-500 hover:text-red-700 hover:bg-red-50 transition-colors cursor-pointer"
+                          title="Delete Student Permanently"
+                        >
+                          <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
                     </td>

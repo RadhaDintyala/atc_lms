@@ -82,6 +82,11 @@ const requireAuth = (req: AuthRequest, res: Response, next: NextFunction): void 
     res.status(401).json({ error: 'Invalid or expired token' });
     return;
   }
+  const user = dbStore.getUserById(payload.userId);
+  if (!user || user.status === 'inactive') {
+    res.status(401).json({ error: 'Account not found or deactivated' });
+    return;
+  }
   req.user = payload;
   next();
 };
@@ -122,7 +127,7 @@ app.post('/api/auth/login', (req: Request, res: Response) => {
 app.get('/api/auth/me', requireAuth, (req: AuthRequest, res: Response) => {
   const user = dbStore.getUserById(req.user!.userId);
   if (!user) {
-    res.status(404).json({ error: 'User not found' });
+    res.status(401).json({ error: 'User session not found' });
     return;
   }
   const { password_hash, ...safeUser } = user;
@@ -296,6 +301,15 @@ app.put('/api/students/:id', requireAuth, (req: AuthRequest, res: Response) => {
     const updated = dbStore.updateStudentProfile(profileId, allowedData);
     const { password_hash, ...safeUser } = updated.user;
     res.json({ user: safeUser, profile: updated.profile });
+  } catch (err: any) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+app.delete('/api/students/:id', requireAdmin, (req: Request, res: Response) => {
+  try {
+    const result = dbStore.deleteStudent(req.params.id);
+    res.json(result);
   } catch (err: any) {
     res.status(400).json({ error: err.message });
   }

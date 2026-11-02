@@ -47,6 +47,14 @@ async function request(endpoint, options = {}) {
   const data = await response.json().catch(() => ({}));
 
   if (!response.ok) {
+    if (response.status === 401 && !endpoint.includes('/auth/login') && !endpoint.includes('/auth/signup')) {
+      // Session expired or invalid — clear token and dispatch event
+      localStorage.removeItem('beacon_token');
+      localStorage.removeItem('apexlms_token');
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('beacon:auth-expired', { detail: data.error || 'Session expired' }));
+      }
+    }
     throw new Error(data.error || 'An unexpected error occurred');
   }
 
@@ -84,6 +92,10 @@ export const api = {
     request(`/students/${id}`, {
       method: 'PUT',
       body: JSON.stringify(updateData),
+    }),
+  deleteStudent: (id) =>
+    request(`/students/${id}`, {
+      method: 'DELETE',
     }),
 
   // Curriculum & Topics

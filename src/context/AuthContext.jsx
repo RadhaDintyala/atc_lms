@@ -39,6 +39,18 @@ export function AuthProvider({ children }) {
     }
 
     loadUser();
+
+    // Listen for 401 unauthenticated events from API calls
+    const handleAuthExpired = (event) => {
+      console.warn('Authentication expired, clearing session:', event.detail);
+      logout();
+      setAuthError(event.detail || 'Your session has expired. Please sign in again.');
+    };
+
+    window.addEventListener('beacon:auth-expired', handleAuthExpired);
+    return () => {
+      window.removeEventListener('beacon:auth-expired', handleAuthExpired);
+    };
   }, []);
 
   const login = async (email, password) => {

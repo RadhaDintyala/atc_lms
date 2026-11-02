@@ -262,10 +262,11 @@ export default function ProjectsModule({ initialTopicForProject, onClearInitialT
         topic_id: form.topic_id,
         title: form.title.trim(),
         problem_statement: form.problem_statement.trim(),
-        tech_stack: form.tech_stack
-          .split(',')
-          .map((s) => s.trim())
-          .filter(Boolean),
+        tech_stack: Array.isArray(form.tech_stack)
+          ? form.tech_stack
+          : (typeof form.tech_stack === 'string'
+              ? form.tech_stack.split(',').map((s) => s.trim()).filter(Boolean)
+              : []),
         github_url: form.github_url.trim(),
         deployment_url: form.deployment_url.trim(),
         description: form.description.trim(),
