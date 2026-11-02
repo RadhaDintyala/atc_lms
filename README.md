@@ -1,130 +1,175 @@
-# ApexLMS — Engineering Project Roadmap & Curriculum Management System (MongoDB Edition)
+# Beacon — Engineering Project Roadmap & Adaptive Learning Platform
 
-ApexLMS is a production-grade Learning Management System (LMS) designed specifically for 1st, 2nd, and 3rd year engineering students, backed by **MongoDB**. The platform guides students through structured project-based learning roadmaps, provides verified learning resources, tracks progress at resource/topic/curriculum levels, and empowers administrators to review project submissions, monitor cohort mastery, and export audit reports.
+Beacon is a modern, production-grade Learning Management System (LMS) engineered for 1st, 2nd, and 3rd year engineering students. The platform delivers structured project-based learning roadmaps, verified learning resources, real-time topic progress tracking, GitHub project submission pipelines, and an administrative command center for mentor reviews and cohort management.
 
 ---
 
-## 1. Architectural Overview
+## 1. System Architecture
 
 ```
 ┌────────────────────────────────────────────────────────┐
-│               React Frontend (Vite + JSX)             │
-│  - Tailwind CSS Light Theme (Navy / Yellow / Cyan)     │
-│  - Recharts Visual Analytics                           │
-│  - Student Dashboard, Learning Path & Project Module   │
-│  - Mentor Admin Command Center & Resource Library      │
+│            Frontend SPA (React 19 + Vite)              │
+│  - Hosted on Vercel                                    │
+│  - Tailwind CSS Theme (Yellow #F9C321 / Dark #111111)  │
+│  - Role-gated Auth (Student Login/Signup & Admin Only) │
+│  - Student Roadmap, Topics, Project Submission Portal  │
+│  - Mentor Admin Review & Student Dossier Center        │
 └───────────────────────────┬────────────────────────────┘
                             │ REST API (Bearer JWT)
+                            │ https://<render-app>.onrender.com/api
 ┌───────────────────────────▼────────────────────────────┐
-│               Backend Service Layer                    │
-│  - Python 3.10 + FastAPI (High-throughput Async API)   │
-│  - Motor (AsyncIO Driver) & PyMongo                    │
-│  - Argon2 / Bcrypt Password Hashing                    │
-│  - Real-time Progress Recalculation Engine             │
+│            Backend API (Node.js + Express + TS)        │
+│  - Hosted on Render (Web Service)                      │
+│  - TypeScript Execution via `tsx`                      │
+│  - JWT Auth & Session Verification Middleware          │
+│  - Automated Topic & Curriculum Progress Engine        │
+│  - Project Submission & Approval Pipeline              │
 └───────────────────────────┬────────────────────────────┘
-                            │ mongodb://localhost:27017
+                            │ Mongoose Driver (TLS)
 ┌───────────────────────────▼────────────────────────────┐
-│               MongoDB Document Database                │
-│  - NoSQL Collections with Unique & Compound Indexes    │
-│  - users, student_profiles, topics, resources, etc.   │
-│  - Historical project submission and review audits     │
+│            MongoDB Atlas (Persistent Cloud NoSQL)      │
+│  - Primary Cloud Store: `cluster0.blxmown.mongodb.net` │
+│  - Collections: users, student_profiles, topics, etc.  │
+│  - Offline / Local Dev Fallback: `data/db.json`        │
 └────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 2. Engineering Curriculum Tracks
+## 2. Core Features & Modules
 
-- **1st Year (Common Foundation)**: 8 categories (Python, Java, JavaScript, Web architecture, HTML/CSS/DOM, Git/GitHub, DevTools, Prompt Engineering, REST APIs, Project workflows).
-- **2nd Year (Track 1: Full-Stack & App Dev)**: 10 categories (FastAPI, Django, Spring Boot, Node.js, React, Mobile with Flutter/React Native, MongoDB & SQL, Docker, CI/CD, Redis, Distributed systems).
-- **2nd Year (Track 2: AI Engineering)**: 11 categories (Python for AI, LLM APIs, Prompt Engineering, Embeddings & Vector DBs, RAG systems, Autonomous Agents with ReAct loops, AI Evaluation, Linux tools, Cloud IAM, Security guardrails, Production observability).
-- **3rd Year (Advanced Capstone)**: Enterprise architecture, system design, microservices, LoRA fine-tuning, high-throughput vLLM serving, and capstone portfolio projects.
+### 🎓 Student Experience
+- **Adaptive Curriculum Tracks**:
+  - **1st Year (Common Foundation)**: Python, Java, JavaScript, Web architecture, HTML/CSS, Git/GitHub, REST APIs.
+  - **2nd Year (Full-Stack & App Dev)**: Node.js, Express, React, MongoDB, SQL, Docker, CI/CD, Redis.
+  - **2nd Year (AI Engineering)**: Python for AI, LLM APIs, Prompt Engineering, Embeddings, Vector DBs, RAG systems, Autonomous Agents.
+  - **3rd Year (Advanced Capstone)**: System design, microservices, cloud deployment, capstone projects.
+- **Resource Verification & Topic Completion**: Mark individual resources completed to calculate topic completion.
+- **Project Submission Pipeline**: Submit live GitHub repository and preview URLs tied directly to curriculum topics. Automatic submission confirmation and review workflow.
 
----
+### 🛡️ Admin & Mentor Command Center
+- **Pre-configured Super Admin Access**: Secure administrative portal with single-click prefilled credentials.
+- **Project Review Queue**: Review pending student submissions, approve or reject with mentor feedback notes, and award completion credit.
+- **Student Dossier & Analytics**: Monitor student progress percentage, active topics, approved projects, and perform permanent account deletions.
+- **Curriculum Content Management**: Add, modify, or archive topics and resources dynamically.
 
-## 3. MongoDB Database Collections & Indexing
-
-The application organizes data into collections with schema validation and indexing:
-
-| Collection Name | Document Contents | Indexes & Unique Constraints |
-|---|---|---|
-| `users` | Accounts, hashed credentials, roles | `{"email": 1}` (Unique) |
-| `student_profiles` | Student enrollment, year, track, roll number | `{"roll_number": 1}` (Unique), `{"user_id": 1}` (Unique) |
-| `curriculum_tracks` | Specialization track definitions | `{"_id": 1}` |
-| `curriculum_years` | Academic year levels | `{"_id": 1}` |
-| `categories` | Curriculum modules | `{"year_id": 1}`, `{"track_id": 1}` |
-| `topics` | Topic descriptions, objectives, duration, level | `{"slug": 1}` (Unique), `{"year_id": 1, "track_id": 1}` |
-| `resources` | External guides, tutorials, documentation | `{"topic_id": 1, "display_order": 1}` |
-| `student_topic_progress` | Progress status (`not_started`, `in_progress`, `completed`) | `{"student_id": 1, "topic_id": 1}` (Compound Unique) |
-| `student_resource_progress` | Resource completion records | `{"student_id": 1, "resource_id": 1}` (Compound Unique) |
-| `projects` | Submissions, GitHub/live URLs, reviewer notes | `{"student_id": 1, "status": 1}` |
-| `activity_logs` | Audit trail of actions | `{"student_id": 1, "timestamp": -1}` |
+### 🔒 Hardened Authentication & Session Lifecycle
+- **JWT Authentication**: Secure Bearer token issued on login.
+- **Active Session Validation**: Backend verifies user status on every authenticated request (`requireAuth`), returning `401 Unauthorized` if an account was removed or invalidated.
+- **Client Auto-Logout on 401**: Axios response interceptors immediately wipe tokens from `localStorage` and trigger reactive logout with user prompt when credentials expire.
+- **Clean Slate Policy**: Production database contains **zero mock/dummy students**. New students register directly through the portal.
 
 ---
 
-## 4. Progress Tracking Engine
+## 3. Super Admin Credentials
 
-Progress is tracked across three levels:
-1. **Resource Level**: Not Started / In Progress / Completed. (Opening links does NOT auto-complete; explicit verification is required).
-2. **Topic Level**: Not Started / In Progress / Completed.
-3. **Curriculum Level**: Calculated authoritatively on the backend using the formula:
+The administrative portal is protected and restricts access to authenticated mentors and administrators:
 
-$$\text{Completion Percentage} = \left( \frac{\text{Completed Required Topics}}{\text{Total Required Topics}} \right) \times 100$$
+| Field | Production Value |
+|---|---|
+| **Role** | Admin (Select the **Admin** tab on login) |
+| **Name** | Super Admin |
+| **Email** | `beacon.atc@gmail.om` *(or `beacon.atc@gmail.com`)* |
+| **Password** | `test@beacon.com` |
 
-- Excludes unpublished topics and optional electives.
-- Recalculates immediately upon status changes.
-- Automatically flags inactive students with no progress updates in **14+ days**.
+> [!NOTE]
+> When the **Admin** tab is selected on the login page, account registration is disabled and the Super Admin credentials are automatically pre-filled for convenience.
 
 ---
 
-## 5. Development & Running with Docker Compose
+## 4. Local Development Setup
 
-Orchestrates **MongoDB 7.0**, the **FastAPI Python backend**, and the **React frontend**:
+### Prerequisites
+- **Node.js** (v18.0.0 or higher)
+- **npm** (v9.0.0 or higher)
+- Optional: MongoDB Atlas URI or local MongoDB instance (defaults to local file storage `data/db.json` if omitted).
 
+### Step 1: Install Dependencies
 ```bash
-# 1. Clone repository
-git clone <repo-url>
-cd apexlms
-
-# 2. Configure environment
-cp .env.example .env
-
-# 3. Spin up full stack with MongoDB
-docker compose up --build -d
-
-# 4. Seed MongoDB with curriculum and sample accounts
-docker compose exec backend python -m app.db.seed_mongo
-
-# 5. View running services
-docker compose ps
+npm install --legacy-peer-deps
 ```
 
-- **Frontend Application**: `http://localhost:3000`
-- **FastAPI Backend & Swagger Docs**: `http://localhost:8000/docs`
-- **MongoDB Database**: `mongodb://localhost:27017/apexlms_db`
-
----
-
-## 6. Pre-seeded Demo Accounts
-
-Use these pre-configured accounts for testing:
-
-| Role | Name | Email | Password | Track / Year |
-|---|---|---|---|---|
-| **Chief Mentor** | Dr. Sarah Chen | `mentor.admin@apex.edu` | `Password@123` | Administrator (Full Platform Access) |
-| **Student** | Alex Rivers | `alex.rivers@apex.edu` | `Password@123` | 1st Year • Common Foundation |
-| **Student** | Priya Patel | `priya.patel@apex.edu` | `Password@123` | 2nd Year • Full-Stack Track |
-| **Student** | Marcus Vance | `marcus.vance@apex.edu` | `Password@123` | 2nd Year • AI Engineering Track |
-| **Student** | Elena Rostova | `elena.rostova@apex.edu` | `Password@123` | 3rd Year • Advanced Capstone |
-| **Student** | Devon Lane | `devon.lane@apex.edu` | `Password@123` | 2nd Year • Inactive Flagged (25d) |
-
-> A **1-Click Demo Account Switcher** is built into the top navigation bar to test all user roles and tracks effortlessly.
-
----
-
-## 7. Automated Tests
-
-```bash
-cd backend
-pytest -v
+### Step 2: Configure Environment (`.env`)
+Create a `.env` file in the project root:
+```env
+PORT=5000
+JWT_SECRET=beacon_development_jwt_secret_key_change_in_production
+MONGO_URI=mongodb+srv://<username>:<password>@cluster0.blxmown.mongodb.net/atc_lms?retryWrites=true&w=majority
+VITE_API_BASE_URL=http://localhost:5000/api
 ```
+
+### Step 3: Run Full Stack (Frontend + Backend)
+```bash
+npm run dev
+```
+- **Frontend SPA**: `http://localhost:3000`
+- **Backend REST API**: `http://localhost:5000/api`
+
+---
+
+## 5. Production Deployment Guide
+
+The platform is designed to be deployed as a separated decoupled architecture:
+
+### A. Backend Deployment (Render)
+1. Link your GitHub repository to **Render** as a **Web Service**.
+2. Set configuration:
+   - **Environment**: `Node`
+   - **Build Command**: `npm install --legacy-peer-deps`
+   - **Start Command**: `npm start` *(runs `tsx server.ts`)*
+3. Add Environment Variables on Render:
+   | Variable | Value |
+   |---|---|
+   | `PORT` | `10000` |
+   | `NODE_ENV` | `production` |
+   | `JWT_SECRET` | *(strong random secret string)* |
+   | `MONGO_URI` | `mongodb+srv://<user>:<password>@cluster0.blxmown.mongodb.net/atc_lms?retryWrites=true&w=majority` |
+   | `CORS_ORIGIN` | `https://<your-vercel-domain>.vercel.app` |
+
+### B. Frontend Deployment (Vercel)
+1. Import the same repository into **Vercel**.
+2. Set configuration:
+   - **Framework Preset**: `Vite`
+   - **Build Command**: `npm run build`
+   - **Output Directory**: `dist`
+3. Add Environment Variables on Vercel:
+   | Variable | Value |
+   |---|---|
+   | `VITE_API_BASE_URL` | `https://<your-render-service>.onrender.com/api` |
+
+> [!IMPORTANT]
+> Ensure `VITE_API_BASE_URL` includes the `/api` suffix (e.g., `https://beacon-o99p.onrender.com/api`). The frontend client auto-normalizes missing suffixes and handles trailing slashes gracefully.
+
+---
+
+## 6. API Reference Summary
+
+| Method | Endpoint | Access | Description |
+|---|---|---|---|
+| `GET` | `/` | Public | Healthcheck and server identity |
+| `POST` | `/api/auth/login` | Public | Authenticate user & issue JWT token |
+| `POST` | `/api/auth/register` | Public | Register new student profile |
+| `GET` | `/api/auth/me` | Authenticated | Fetch current user session details |
+| `GET` | `/api/curriculum/tracks` | Authenticated | List all curriculum tracks & years |
+| `GET` | `/api/curriculum/topics` | Authenticated | List topics with completion status |
+| `PATCH`| `/api/curriculum/topics/:id/progress` | Student | Update topic/resource progress |
+| `GET` | `/api/projects` | Authenticated | List submitted projects (filtered by role) |
+| `POST` | `/api/projects` | Student | Submit project with GitHub & live URLs |
+| `PATCH`| `/api/projects/:id/review` | Admin | Approve or reject project with notes |
+| `GET` | `/api/students` | Admin | Get cohort students with progress metrics |
+| `DELETE`| `/api/students/:id` | Admin | Permanently delete student and records |
+
+---
+
+## 7. Scripts Reference
+
+| Command | Action |
+|---|---|
+| `npm run dev` | Runs backend server and Vite frontend concurrently |
+| `npm run server` | Starts Express backend in development mode with `tsx watch` |
+| `npm run client` | Starts Vite development server for the React frontend |
+| `npm run build` | Compiles TypeScript and builds production frontend bundle in `dist/` |
+| `npm start` | Production backend launch command on Render (`tsx server.ts`) |
+
+---
+
