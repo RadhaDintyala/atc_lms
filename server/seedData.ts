@@ -705,10 +705,19 @@ export function generateSeedData() {
   const sampleUsers: User[] = [
     {
       id: 'usr-admin-1',
-      email: 'mentor.admin@beacon.edu',
-      password_hash: hashPassword('Password@123'),
+      email: 'beacon.atc@gmail.om',
+      password_hash: hashPassword('test@beacon.com'),
       role: 'admin',
-      full_name: 'Dr. Sarah Chen (Chief Mentor)',
+      full_name: 'Super Admin',
+      created_at: '2026-08-01T08:00:00Z',
+      status: 'active',
+    },
+    {
+      id: 'usr-admin-2',
+      email: 'beacon.atc@gmail.com',
+      password_hash: hashPassword('test@beacon.com'),
+      role: 'admin',
+      full_name: 'Super Admin',
       created_at: '2026-08-01T08:00:00Z',
       status: 'active',
     },

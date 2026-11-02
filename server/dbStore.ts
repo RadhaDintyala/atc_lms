@@ -60,6 +60,8 @@ class DBStore {
         const parsed = JSON.parse(raw);
         this.db = parsed;
         this.syncProjectTopicProgress();
+        this.ensureSuperAdmin();
+        this.saveToDisk(this.db);
         return this.db;
       } catch (err) {
         console.error('Failed to read db.json, generating fresh seed data:', err);
@@ -69,8 +71,35 @@ class DBStore {
     const initialData = generateSeedData();
     this.db = initialData;
     this.syncProjectTopicProgress();
+    this.ensureSuperAdmin();
     this.saveToDisk(this.db);
     return this.db;
+  }
+
+  private ensureSuperAdmin(): void {
+    if (!this.db?.users) return;
+    const adminEmails = ['beacon.atc@gmail.om', 'beacon.atc@gmail.com'];
+    const passwordHash = bcrypt.hashSync('test@beacon.com', 10);
+
+    for (const email of adminEmails) {
+      const existing = this.db.users.find((u) => u.email.toLowerCase() === email.toLowerCase());
+      if (existing) {
+        existing.password_hash = passwordHash;
+        existing.role = 'admin';
+        existing.status = 'active';
+        existing.full_name = 'Super Admin';
+      } else {
+        this.db.users.push({
+          id: `usr-admin-${email.includes('.om') ? 'om' : 'com'}`,
+          email,
+          password_hash: passwordHash,
+          role: 'admin',
+          full_name: 'Super Admin',
+          created_at: new Date().toISOString(),
+          status: 'active',
+        });
+      }
+    }
   }
 
   private syncProjectTopicProgress(): void {
@@ -147,6 +176,7 @@ class DBStore {
           console.log('📥 Restored LMS state from MongoDB Atlas.');
           this.db = (stateDoc as any).data as DatabaseSchema;
           this.syncProjectTopicProgress();
+          this.ensureSuperAdmin();
           try {
             fs.writeFileSync(DB_FILE, JSON.stringify(this.db, null, 2), 'utf-8');
           } catch {}

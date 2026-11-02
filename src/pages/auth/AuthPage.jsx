@@ -12,10 +12,12 @@ import {
   Code2,
   Cpu,
   Hash,
+  KeyRound,
 } from 'lucide-react';
 
 export default function AuthPage() {
   const { login, signup, authError } = useAuth();
+  const [role, setRole] = useState('student'); // 'student' | 'admin'
   const [mode, setMode] = useState('signin'); // 'signin' | 'signup'
 
   // Sign In State
@@ -24,8 +26,7 @@ export default function AuthPage() {
   const [signInLoading, setSignInLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState(null);
 
-  // Sign Up State
-  const [role, setRole] = useState('student'); // 'student' | 'admin'
+  // Sign Up State (for Students)
   const [fullName, setFullName] = useState('');
   const [signUpEmail, setSignUpEmail] = useState('');
   const [signUpPassword, setSignUpPassword] = useState('');
@@ -35,6 +36,23 @@ export default function AuthPage() {
   const [college, setCollege] = useState('Beacon Institute of Technology');
   const [rollNumber, setRollNumber] = useState('');
   const [signUpLoading, setSignUpLoading] = useState(false);
+
+  // Handle switching between Student and Admin role
+  const handleRoleSelect = (selectedRole) => {
+    setRole(selectedRole);
+    setErrorMsg(null);
+
+    if (selectedRole === 'admin') {
+      // Admin only gets login (no signup) and credentials enabled
+      setMode('signin');
+      setSignInEmail('beacon.atc@gmail.om');
+      setSignInPassword('test@beacon.com');
+    } else {
+      // Student gets clean inputs
+      setSignInEmail('');
+      setSignInPassword('');
+    }
+  };
 
   // Handle year change in signup form
   const handleYearChange = (newYear) => {
@@ -83,12 +101,12 @@ export default function AuthPage() {
     try {
       setSignUpLoading(true);
       await signup({
-        role,
+        role: 'student',
         full_name: nameClean,
         email: emailClean,
         password: signUpPassword,
-        year: role === 'student' ? year : undefined,
-        track_id: role === 'student' ? track : undefined,
+        year,
+        track_id: track,
         department: department.trim(),
         college: college.trim(),
         roll_number: rollNumber.trim() || undefined,
@@ -114,41 +132,76 @@ export default function AuthPage() {
           Engineering Project Roadmap & Adaptive Learning Platform
         </p>
 
-        {/* Auth Mode Toggle Tabs */}
-        <div className="mt-6 p-1 bg-[#1A1A1A] border border-[#2E2E32] rounded-lg grid grid-cols-2 gap-1 max-w-xs mx-auto">
+        {/* Portal Role Selector (Student vs Admin) */}
+        <div className="mt-5 p-1 bg-[#1A1A1A] border border-[#2E2E32] rounded-lg grid grid-cols-2 gap-1 max-w-xs mx-auto">
           <button
             type="button"
-            onClick={() => {
-              setMode('signin');
-              setErrorMsg(null);
-            }}
-            className={`py-1.5 text-xs font-bold rounded-md transition-all cursor-pointer ${
-              mode === 'signin'
-                ? 'bg-[#F9C321] text-[#111111]'
+            onClick={() => handleRoleSelect('student')}
+            className={`py-1.5 px-3 text-xs font-bold rounded-md transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+              role === 'student'
+                ? 'bg-[#F9C321] text-[#111111] shadow'
                 : 'text-[#A1A1AA] hover:text-white'
             }`}
           >
-            Sign In
+            <UserCheck className="w-3.5 h-3.5" />
+            <span>Student</span>
           </button>
           <button
             type="button"
-            onClick={() => {
-              setMode('signup');
-              setErrorMsg(null);
-            }}
-            className={`py-1.5 text-xs font-bold rounded-md transition-all cursor-pointer ${
-              mode === 'signup'
-                ? 'bg-[#F9C321] text-[#111111]'
+            onClick={() => handleRoleSelect('admin')}
+            className={`py-1.5 px-3 text-xs font-bold rounded-md transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+              role === 'admin'
+                ? 'bg-[#F9C321] text-[#111111] shadow'
                 : 'text-[#A1A1AA] hover:text-white'
             }`}
           >
-            Create Account
+            <ShieldCheck className="w-3.5 h-3.5" />
+            <span>Admin</span>
           </button>
         </div>
+
+        {/* Auth Mode Toggle Tabs (Only shown for Student; Admin is Sign In only) */}
+        {role === 'student' ? (
+          <div className="mt-3 p-1 bg-[#141416] border border-[#27272A] rounded-lg grid grid-cols-2 gap-1 max-w-[240px] mx-auto">
+            <button
+              type="button"
+              onClick={() => {
+                setMode('signin');
+                setErrorMsg(null);
+              }}
+              className={`py-1 text-[11px] font-bold rounded transition-all cursor-pointer ${
+                mode === 'signin'
+                  ? 'bg-white text-[#111111]'
+                  : 'text-[#71717A] hover:text-white'
+              }`}
+            >
+              Sign In
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setMode('signup');
+                setErrorMsg(null);
+              }}
+              className={`py-1 text-[11px] font-bold rounded transition-all cursor-pointer ${
+                mode === 'signup'
+                  ? 'bg-white text-[#111111]'
+                  : 'text-[#71717A] hover:text-white'
+              }`}
+            >
+              Create Account
+            </button>
+          </div>
+        ) : (
+          <div className="mt-3 text-[11px] font-bold text-[#F9C321] flex items-center justify-center gap-1.5">
+            <ShieldCheck className="w-3.5 h-3.5 text-[#F9C321]" />
+            <span>Administrator Sign In Only</span>
+          </div>
+        )}
       </div>
 
       {/* Main Auth Container */}
-      <div className="mt-6 sm:mx-auto sm:w-full sm:max-w-md px-4">
+      <div className="mt-5 sm:mx-auto sm:w-full sm:max-w-md px-4">
         <div className="bg-[#18181B] py-7 px-6 sm:px-8 rounded-xl border border-[#2E2E32] shadow-xl">
           {(errorMsg || authError) && (
             <div className="mb-5 p-3 rounded-lg bg-[#2E1818] border border-[#522020] text-red-300 text-xs flex items-center gap-2">
@@ -160,6 +213,35 @@ export default function AuthPage() {
           {/* ===================== SIGN IN FORM ===================== */}
           {mode === 'signin' && (
             <form onSubmit={handleSignIn} className="space-y-4">
+              {/* Admin credentials info banner */}
+              {role === 'admin' && (
+                <div className="p-3 rounded-lg bg-[#1F1D13] border border-[#524410] text-xs">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="font-bold text-[#F9C321] flex items-center gap-1.5">
+                      <BadgeCheck className="w-4 h-4 text-[#F9C321]" />
+                      Super Admin Credentials Enabled
+                    </span>
+                    <span className="text-[10px] bg-[#F9C321]/20 text-[#F9C321] px-1.5 py-0.5 rounded font-mono font-bold">
+                      ADMIN
+                    </span>
+                  </div>
+                  <div className="text-[11px] text-[#D4D4D8] space-y-1 font-mono">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[#A1A1AA]">Name:</span>
+                      <span className="text-white font-semibold">Super Admin</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-[#A1A1AA]">Mail:</span>
+                      <span className="text-[#F9C321] font-semibold">beacon.atc@gmail.om</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-[#A1A1AA]">Password:</span>
+                      <span className="text-zinc-300">test@beacon.com</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               <div>
                 <label className="block text-[11px] font-bold text-[#A1A1AA] uppercase tracking-wider mb-1.5">
                   Email Address
@@ -173,7 +255,7 @@ export default function AuthPage() {
                     required
                     value={signInEmail}
                     onChange={(e) => setSignInEmail(e.target.value)}
-                    placeholder="name@university.edu"
+                    placeholder={role === 'admin' ? 'beacon.atc@gmail.om' : 'name@university.edu'}
                     className="w-full pl-9 pr-3 py-2 rounded-lg bg-[#111111] border border-[#333333] text-white placeholder-[#71717A] text-xs focus:outline-none focus:border-[#F9C321] focus:ring-1 focus:ring-[#F9C321] transition-colors"
                   />
                 </div>
@@ -207,7 +289,9 @@ export default function AuthPage() {
                   <div className="w-4 h-4 border-2 border-[#111111] border-t-transparent rounded-full animate-spin"></div>
                 ) : (
                   <>
-                    <span>Sign In to Dashboard</span>
+                    <span>
+                      {role === 'admin' ? 'Sign In as Super Admin' : 'Sign In to Dashboard'}
+                    </span>
                     <ArrowRight className="w-4 h-4 text-[#111111]" />
                   </>
                 )}
@@ -215,73 +299,11 @@ export default function AuthPage() {
             </form>
           )}
 
-          {/* ===================== SIGN UP FORM ===================== */}
-          {mode === 'signup' && (
+          {/* ===================== SIGN UP FORM (Students Only) ===================== */}
+          {mode === 'signup' && role === 'student' && (
             <form onSubmit={handleSignUp} className="space-y-4">
-              {/* Role Selector Card */}
-              <div>
-                <label className="block text-[11px] font-bold text-[#A1A1AA] uppercase tracking-wider mb-2">
-                  Select Your Account Role
-                </label>
-                <div className="grid grid-cols-2 gap-2.5">
-                  <button
-                    type="button"
-                    onClick={() => setRole('student')}
-                    className={`p-3 rounded-lg border text-left transition-all cursor-pointer flex items-start gap-2.5 ${
-                      role === 'student'
-                        ? 'bg-[#1C1C1E] border-[#F9C321] text-white'
-                        : 'bg-[#111111] border-[#2E2E32] text-[#71717A] hover:border-[#444]'
-                    }`}
-                  >
-                    <div
-                      className={`p-1.5 rounded-md shrink-0 ${
-                        role === 'student'
-                          ? 'bg-[#F9C321] text-[#111111] font-bold'
-                          : 'bg-[#1C1C1E] text-[#71717A]'
-                      }`}
-                    >
-                      <UserCheck className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <div className="text-xs font-bold text-white flex items-center gap-1.5">
-                        Student
-                        {role === 'student' && <BadgeCheck className="w-3.5 h-3.5 text-[#F9C321]" />}
-                      </div>
-                      <p className="text-[10px] text-[#A1A1AA] mt-0.5 leading-snug">
-                        Complete curriculum & submit projects
-                      </p>
-                    </div>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setRole('admin')}
-                    className={`p-3 rounded-lg border text-left transition-all cursor-pointer flex items-start gap-2.5 ${
-                      role === 'admin'
-                        ? 'bg-[#1C1C1E] border-white text-white'
-                        : 'bg-[#111111] border-[#2E2E32] text-[#71717A] hover:border-[#444]'
-                    }`}
-                  >
-                    <div
-                      className={`p-1.5 rounded-md shrink-0 ${
-                        role === 'admin'
-                          ? 'bg-white text-[#111111] font-bold'
-                          : 'bg-[#1C1C1E] text-[#71717A]'
-                      }`}
-                    >
-                      <ShieldCheck className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <div className="text-xs font-bold text-white flex items-center gap-1.5">
-                        Mentor / Admin
-                        {role === 'admin' && <BadgeCheck className="w-3.5 h-3.5 text-white" />}
-                      </div>
-                      <p className="text-[10px] text-[#A1A1AA] mt-0.5 leading-snug">
-                        Review submissions & manage syllabus
-                      </p>
-                    </div>
-                  </button>
-                </div>
+              <div className="text-xs text-[#A1A1AA] pb-1 border-b border-[#27272A]">
+                Create your student account to access the engineering roadmap.
               </div>
 
               {/* Name & Email */}
@@ -344,133 +366,118 @@ export default function AuthPage() {
                 </div>
               </div>
 
-              {/* Student-specific details: Year of Study, Track, Roll Number */}
-              {role === 'student' && (
-                <div className="p-3.5 rounded-lg bg-[#111111] border border-[#2E2E32] space-y-3">
-                  <div>
-                    <label className="block text-[11px] font-bold text-[#F9C321] uppercase tracking-wider mb-1.5">
-                      Select Your Year of Study
-                    </label>
-                    <div className="grid grid-cols-3 gap-2">
-                      <button
-                        type="button"
-                        onClick={() => handleYearChange('year_1')}
-                        className={`py-2 px-2 rounded-lg border text-center transition-all cursor-pointer ${
-                          year === 'year_1'
-                            ? 'bg-[#F9C321] text-[#111111] font-bold border-[#F9C321]'
-                            : 'bg-[#18181B] border-[#2E2E32] text-[#A1A1AA] hover:text-white'
-                        }`}
-                      >
-                        <p className="text-xs font-bold">1st Year</p>
-                        <p className={`text-[10px] ${year === 'year_1' ? 'text-[#111111]' : 'text-[#71717A]'}`}>
-                          Foundation
-                        </p>
-                      </button>
+              {/* Student Details: Year of Study, Track, Roll Number */}
+              <div className="p-3.5 rounded-lg bg-[#111111] border border-[#2E2E32] space-y-3">
+                <div>
+                  <label className="block text-[11px] font-bold text-[#F9C321] uppercase tracking-wider mb-1.5">
+                    Select Your Year of Study
+                  </label>
+                  <div className="grid grid-cols-3 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => handleYearChange('year_1')}
+                      className={`py-2 px-2 rounded-lg border text-center transition-all cursor-pointer ${
+                        year === 'year_1'
+                          ? 'bg-[#F9C321] text-[#111111] font-bold border-[#F9C321]'
+                          : 'bg-[#18181B] border-[#2E2E32] text-[#A1A1AA] hover:text-white'
+                      }`}
+                    >
+                      <p className="text-xs font-bold">1st Year</p>
+                      <p className={`text-[10px] ${year === 'year_1' ? 'text-[#111111]' : 'text-[#71717A]'}`}>
+                        Foundation
+                      </p>
+                    </button>
 
-                      <button
-                        type="button"
-                        onClick={() => handleYearChange('year_2')}
-                        className={`py-2 px-2 rounded-lg border text-center transition-all cursor-pointer ${
-                          year === 'year_2'
-                            ? 'bg-[#F9C321] text-[#111111] font-bold border-[#F9C321]'
-                            : 'bg-[#18181B] border-[#2E2E32] text-[#A1A1AA] hover:text-white'
-                        }`}
-                      >
-                        <p className="text-xs font-bold">2nd Year</p>
-                        <p className={`text-[10px] ${year === 'year_2' ? 'text-[#111111]' : 'text-[#71717A]'}`}>
-                          Core Track
-                        </p>
-                      </button>
+                    <button
+                      type="button"
+                      onClick={() => handleYearChange('year_2')}
+                      className={`py-2 px-2 rounded-lg border text-center transition-all cursor-pointer ${
+                        year === 'year_2'
+                          ? 'bg-[#F9C321] text-[#111111] font-bold border-[#F9C321]'
+                          : 'bg-[#18181B] border-[#2E2E32] text-[#A1A1AA] hover:text-white'
+                      }`}
+                    >
+                      <p className="text-xs font-bold">2nd Year</p>
+                      <p className={`text-[10px] ${year === 'year_2' ? 'text-[#111111]' : 'text-[#71717A]'}`}>
+                        Core Track
+                      </p>
+                    </button>
 
-                      <button
-                        type="button"
-                        onClick={() => handleYearChange('year_3')}
-                        className={`py-2 px-2 rounded-lg border text-center transition-all cursor-pointer ${
-                          year === 'year_3'
-                            ? 'bg-[#F9C321] text-[#111111] font-bold border-[#F9C321]'
-                            : 'bg-[#18181B] border-[#2E2E32] text-[#A1A1AA] hover:text-white'
-                        }`}
-                      >
-                        <p className="text-xs font-bold">3rd Year</p>
-                        <p className={`text-[10px] ${year === 'year_3' ? 'text-[#111111]' : 'text-[#71717A]'}`}>
-                          Capstone
-                        </p>
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Track selection (shown if 2nd or 3rd year) */}
-                  {year !== 'year_1' ? (
-                    <div>
-                      <label className="block text-[10px] font-bold text-[#A1A1AA] uppercase tracking-wider mb-1.5">
-                        Specialization Track
-                      </label>
-                      <div className="grid grid-cols-2 gap-2">
-                        <button
-                          type="button"
-                          onClick={() => setTrack('fullstack')}
-                          className={`py-1.5 px-3 rounded-lg border text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
-                            track === 'fullstack'
-                              ? 'bg-white text-[#111111] border-white font-bold'
-                              : 'bg-[#18181B] border-[#2E2E32] text-[#A1A1AA]'
-                          }`}
-                        >
-                          <Code2 className="w-3.5 h-3.5" />
-                          <span>Full-Stack Track</span>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setTrack('ai')}
-                          className={`py-1.5 px-3 rounded-lg border text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
-                            track === 'ai'
-                              ? 'bg-white text-[#111111] border-white font-bold'
-                              : 'bg-[#18181B] border-[#2E2E32] text-[#A1A1AA]'
-                          }`}
-                        >
-                          <Cpu className="w-3.5 h-3.5" />
-                          <span>AI Engineering</span>
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
-                    <p className="text-[11px] text-[#A1A1AA] bg-[#18181B] p-2 rounded border border-[#2E2E32]">
-                      1st Year students follow the <strong>Common Foundation</strong> track covering programming, web architecture, and prompt engineering.
-                    </p>
-                  )}
-
-                  {/* Roll Number / Student ID */}
-                  <div>
-                    <label className="block text-[10px] font-bold text-[#A1A1AA] uppercase tracking-wider mb-1">
-                      Roll Number / Student ID (Optional)
-                    </label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#71717A]">
-                        <Hash className="w-3.5 h-3.5" />
-                      </div>
-                      <input
-                        type="text"
-                        value={rollNumber}
-                        onChange={(e) => setRollNumber(e.target.value)}
-                        placeholder="e.g. ENG2026-0488"
-                        className="w-full pl-8 pr-3 py-1.5 rounded-lg bg-[#18181B] border border-[#333333] text-white placeholder-[#71717A] text-xs font-mono focus:outline-none focus:border-[#F9C321] transition-colors"
-                      />
-                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleYearChange('year_3')}
+                      className={`py-2 px-2 rounded-lg border text-center transition-all cursor-pointer ${
+                        year === 'year_3'
+                          ? 'bg-[#F9C321] text-[#111111] font-bold border-[#F9C321]'
+                          : 'bg-[#18181B] border-[#2E2E32] text-[#A1A1AA] hover:text-white'
+                      }`}
+                    >
+                      <p className="text-xs font-bold">3rd Year</p>
+                      <p className={`text-[10px] ${year === 'year_3' ? 'text-[#111111]' : 'text-[#71717A]'}`}>
+                        Capstone
+                      </p>
+                    </button>
                   </div>
                 </div>
-              )}
 
-              {/* Admin specific details */}
-              {role === 'admin' && (
-                <div className="p-3 rounded-lg bg-[#111111] border border-[#2E2E32] text-xs text-[#A1A1AA] space-y-1">
-                  <div className="flex items-center gap-2 font-bold text-white">
-                    <ShieldCheck className="w-4 h-4 text-[#F9C321]" />
-                    <span>Mentor Administrator Permissions</span>
+                {/* Track selection (shown if 2nd or 3rd year) */}
+                {year !== 'year_1' ? (
+                  <div>
+                    <label className="block text-[10px] font-bold text-[#A1A1AA] uppercase tracking-wider mb-1.5">
+                      Specialization Track
+                    </label>
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setTrack('fullstack')}
+                        className={`py-1.5 px-3 rounded-lg border text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                          track === 'fullstack'
+                            ? 'bg-white text-[#111111] border-white font-bold'
+                            : 'bg-[#18181B] border-[#2E2E32] text-[#A1A1AA]'
+                        }`}
+                      >
+                        <Code2 className="w-3.5 h-3.5" />
+                        <span>Full-Stack Track</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setTrack('ai')}
+                        className={`py-1.5 px-3 rounded-lg border text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                          track === 'ai'
+                            ? 'bg-white text-[#111111] border-white font-bold'
+                            : 'bg-[#18181B] border-[#2E2E32] text-[#A1A1AA]'
+                        }`}
+                      >
+                        <Cpu className="w-3.5 h-3.5" />
+                        <span>AI Engineering</span>
+                      </button>
+                    </div>
                   </div>
-                  <p className="text-[11px] text-[#71717A]">
-                    Admin accounts have full authority to modify course topics, learning resources, and track all student cohorts in real-time.
+                ) : (
+                  <p className="text-[11px] text-[#A1A1AA] bg-[#18181B] p-2 rounded border border-[#2E2E32]">
+                    1st Year students follow the <strong>Common Foundation</strong> track covering programming, web architecture, and prompt engineering.
                   </p>
+                )}
+
+                {/* Roll Number / Student ID */}
+                <div>
+                  <label className="block text-[10px] font-bold text-[#A1A1AA] uppercase tracking-wider mb-1">
+                    Roll Number / Student ID (Optional)
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#71717A]">
+                      <Hash className="w-3.5 h-3.5" />
+                    </div>
+                    <input
+                      type="text"
+                      value={rollNumber}
+                      onChange={(e) => setRollNumber(e.target.value)}
+                      placeholder="e.g. ENG2026-0488"
+                      className="w-full pl-8 pr-3 py-1.5 rounded-lg bg-[#18181B] border border-[#333333] text-white placeholder-[#71717A] text-xs font-mono focus:outline-none focus:border-[#F9C321] transition-colors"
+                    />
+                  </div>
                 </div>
-              )}
+              </div>
 
               <button
                 type="submit"
@@ -481,7 +488,7 @@ export default function AuthPage() {
                   <div className="w-4 h-4 border-2 border-[#111111] border-t-transparent rounded-full animate-spin"></div>
                 ) : (
                   <>
-                    <span>Create {role === 'admin' ? 'Admin' : 'Student'} Account</span>
+                    <span>Create Student Account</span>
                     <ArrowRight className="w-4 h-4 text-[#111111]" />
                   </>
                 )}

@@ -9,7 +9,13 @@
  *   Leave VITE_API_BASE_URL unset — the Vite dev server proxies /api → localhost:3000.
  */
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
+// Clean and auto-normalize base URL to prevent missing /api or double slashes
+let rawBase = (import.meta.env.VITE_API_BASE_URL || '/api').trim();
+rawBase = rawBase.replace(/\/+$/, ''); // remove trailing slashes
+if (rawBase && !rawBase.endsWith('/api') && rawBase.startsWith('http')) {
+  rawBase = `${rawBase}/api`;
+}
+const BASE_URL = rawBase || '/api';
 
 function getToken() {
   return localStorage.getItem('beacon_token') || localStorage.getItem('apexlms_token');
@@ -23,7 +29,8 @@ async function request(endpoint, options = {}) {
     ...options.headers,
   };
 
-  const response = await fetch(`${BASE_URL}${endpoint}`, {
+  const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+  const response = await fetch(`${BASE_URL}${cleanEndpoint}`, {
     ...options,
     headers,
   });

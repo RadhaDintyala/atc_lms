@@ -38,6 +38,28 @@ app.use(
 
 app.use(express.json());
 
+// Normalize double slashes and auto-redirect any /auth/* requests to /api/auth/*
+app.use((req: Request, res: Response, next: NextFunction) => {
+  if (req.url.includes('//')) {
+    req.url = req.url.replace(/\/+/g, '/');
+  }
+  if (req.url.startsWith('/auth/')) {
+    req.url = '/api' + req.url;
+  }
+  next();
+});
+
+// Root welcome route for Render backend
+app.get('/', (req: Request, res: Response) => {
+  res.json({
+    service: 'Beacon LMS Backend API',
+    status: 'online',
+    database: dbStore.isMongoConnected() ? 'MongoDB Atlas (Connected 🟢)' : 'Local JSON Storage 📁',
+    health: '/api/health',
+    timestamp: new Date().toISOString(),
+  });
+});
+
 // Auth Middleware
 interface AuthRequest extends Request {
   user?: {
