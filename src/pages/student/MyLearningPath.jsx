@@ -27,7 +27,7 @@ export default function MyLearningPath({ onSelectTopic }) {
       setLoading(true);
       const [curr, prog] = await Promise.all([
         api.getCurriculum(),
-        api.getProgress(profile.id),
+        api.getProgress(),
       ]);
       setCurriculum(curr);
       setProgressData(prog);
@@ -39,6 +39,8 @@ export default function MyLearningPath({ onSelectTopic }) {
   };
 
   useEffect(() => {
+    setCurriculum(null);
+    setProgressData(null);
     fetchData();
   }, [profile?.id]);
 

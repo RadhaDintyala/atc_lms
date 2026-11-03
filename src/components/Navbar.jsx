@@ -58,11 +58,11 @@ export default function Navbar({ onToggleSidebar, onNavigateTab }) {
         type="button"
         onClick={() => setShowYearModal(true)}
         className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-[#FEF9E6] hover:bg-[#FDF2C8] text-[#111111] border border-[#F5D365] transition-colors cursor-pointer group"
-        title="Click to switch your Year of study"
+        title="Academic year is locked. Click to view or switch specialization stream."
       >
         <span>{yearLabel} • {trackLabel}</span>
         <span className="text-[10px] bg-[#F9C321] px-1.5 py-0.2 text-[#111111] font-bold rounded">
-          Change
+          Stream
         </span>
       </button>
     );
@@ -180,7 +180,7 @@ export default function Navbar({ onToggleSidebar, onNavigateTab }) {
                         className="w-full px-4 py-2 text-left text-xs font-semibold text-[#111111] hover:bg-[#F4F4F5] flex items-center gap-2.5 transition-colors cursor-pointer"
                       >
                         <GraduationCap className="w-4 h-4 text-[#71717A]" />
-                        <span>Change Year of Study & Track</span>
+                        <span>Specialization Stream Options</span>
                       </button>
                     </>
                   ) : (

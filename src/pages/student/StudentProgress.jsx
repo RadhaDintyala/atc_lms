@@ -31,7 +31,7 @@ export default function StudentProgress({ onSelectTopic }) {
       try {
         setLoading(true);
         const [progData, currData] = await Promise.all([
-          api.getProgress(profile.id),
+          api.getProgress(),
           api.getCurriculum(),
         ]);
         setProgress(progData);
@@ -42,6 +42,8 @@ export default function StudentProgress({ onSelectTopic }) {
         setLoading(false);
       }
     }
+    setProgress(null);
+    setCurriculum(null);
     loadData();
   }, [profile?.id]);
 

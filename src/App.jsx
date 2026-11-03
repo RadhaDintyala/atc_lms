@@ -35,14 +35,16 @@ function AppContent() {
   // Initial topic passed to project submission
   const [topicForProject, setTopicForProject] = useState(null);
 
-  // When role changes (e.g. from demo switcher), sync tab
+  // When user identity or role changes, completely reset state and navigation tab
   React.useEffect(() => {
-    if (isAdmin && !currentTab.startsWith('admin-')) {
+    setSelectedTopicId(null);
+    setTopicForProject(null);
+    if (isAdmin) {
       setCurrentTab('admin-dashboard');
-    } else if (!isAdmin && currentTab.startsWith('admin-')) {
+    } else {
       setCurrentTab('dashboard');
     }
-  }, [isAdmin]);
+  }, [user?.id, isAdmin]);
 
   const handleNavigateToTopic = (topicId) => {
     setSelectedTopicId(topicId);
@@ -92,7 +94,7 @@ function AppContent() {
           onClose={() => setSidebarOpen(false)}
         />
 
-        <main className="flex-1 w-full min-w-0 overflow-y-auto">
+        <main key={user?.id || 'guest'} className="flex-1 w-full min-w-0 overflow-y-auto">
           {/* Student Views */}
           {!isAdmin && (
             <>

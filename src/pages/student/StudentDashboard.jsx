@@ -31,13 +31,14 @@ export default function StudentDashboard({ onNavigateToTopic, onNavigateTab }) {
     if (!profile?.id) return;
     try {
       setLoading(true);
+      // Strictly derive data for authenticated user from session token
       const [progData, projData, currData] = await Promise.all([
-        api.getProgress(profile.id),
-        api.getProjects({ student_id: profile.id }),
+        api.getProgress(),
+        api.getProjects(),
         api.getCurriculum(),
       ]);
       setProgress(progData);
-      setProjects(projData);
+      setProjects(projData || []);
       setCurriculum(currData);
     } catch (err) {
       console.error('Failed to load student dashboard:', err);
@@ -47,6 +48,10 @@ export default function StudentDashboard({ onNavigateToTopic, onNavigateTab }) {
   };
 
   useEffect(() => {
+    // Clear previous user's dashboard data on profile change
+    setProgress(null);
+    setProjects([]);
+    setCurriculum(null);
     loadDashboardData();
   }, [profile?.id, profile?.current_year, profile?.track_id]);
 
@@ -54,7 +59,7 @@ export default function StudentDashboard({ onNavigateToTopic, onNavigateTab }) {
     if (currentStatus === 'not_started') {
       try {
         await api.updateTopicStatus(topicId, 'in_progress');
-        const updatedProg = await api.getProgress(profile.id);
+        const updatedProg = await api.getProgress();
         setProgress(updatedProg);
       } catch (err) {
         console.error('Failed to update status to in_progress:', err);

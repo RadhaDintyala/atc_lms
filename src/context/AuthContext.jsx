@@ -53,11 +53,14 @@ export function AuthProvider({ children }) {
     };
   }, []);
 
-  const login = async (email, password) => {
+  const login = async (email, password, options = {}) => {
     setLoading(true);
     setAuthError(null);
     try {
-      const data = await api.login(email, password);
+      // Clear any prior tokens or user states to prevent session overlap
+      localStorage.removeItem('beacon_token');
+      localStorage.removeItem('apexlms_token');
+      const data = await api.login(email, password, options);
       localStorage.setItem('beacon_token', data.token);
       setToken(data.token);
       setUser(data.user);
@@ -75,6 +78,8 @@ export function AuthProvider({ children }) {
     setLoading(true);
     setAuthError(null);
     try {
+      localStorage.removeItem('beacon_token');
+      localStorage.removeItem('apexlms_token');
       const data = await api.signup(signupData);
       localStorage.setItem('beacon_token', data.token);
       setToken(data.token);
@@ -96,6 +101,19 @@ export function AuthProvider({ children }) {
     setUser(null);
     setProfile(null);
     setShowYearModal(false);
+    setAuthError(null);
+  };
+
+  const updateTrack = async (track_id) => {
+    try {
+      const updatedProfile = await api.updateTrack(track_id);
+      setProfile((prev) => ({ ...prev, ...updatedProfile }));
+      setShowYearModal(false);
+      return updatedProfile;
+    } catch (err) {
+      console.error('Failed to update track:', err);
+      throw err;
+    }
   };
 
   const updateYear = async (year, track_id) => {
@@ -134,6 +152,7 @@ export function AuthProvider({ children }) {
     login,
     signup,
     logout,
+    updateTrack,
     updateYear,
     refreshProfile,
   };

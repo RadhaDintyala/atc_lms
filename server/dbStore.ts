@@ -408,7 +408,11 @@ class DBStore {
   }
 
   // --- Auth & Users ---
-  public authenticate(identifier: string, passwordPlain: string): { token: string; user: User; profile?: StudentProfile } | null {
+  public authenticate(
+    identifier: string,
+    passwordPlain: string,
+    optOptions?: { year?: 'year_1' | 'year_2' | 'year_3'; track_id?: 'common' | 'fullstack' | 'ai' }
+  ): { token: string; user: User; profile?: StudentProfile } | null {
     if (!identifier || !passwordPlain) return null;
     const cleanId = identifier.trim().toLowerCase();
 
@@ -440,7 +444,22 @@ class DBStore {
     const isValid = bcrypt.compareSync(passwordPlain.trim(), user.password_hash);
     if (!isValid) return null;
 
-    const profile = this.db.profiles.find((p) => p.user_id === user.id);
+    let profile = this.db.profiles.find((p) => p.user_id === user.id);
+
+    // If student opted for year and track during login, set and persist them
+    if (user.role === 'student' && profile && optOptions) {
+      if (optOptions.year) {
+        profile.current_year = optOptions.year;
+        if (optOptions.year === 'year_1') {
+          profile.track_id = 'common';
+        } else if (optOptions.track_id) {
+          profile.track_id = optOptions.track_id;
+        }
+      } else if (optOptions.track_id && profile.current_year !== 'year_1') {
+        profile.track_id = optOptions.track_id;
+      }
+    }
+
     const token = jwt.sign(
       {
         userId: user.id,
@@ -458,6 +477,45 @@ class DBStore {
     }
 
     return { token, user, profile };
+  }
+
+  // Check if a student is eligible to switch their specialization stream
+  public canStudentChangeTrack(profileId: string): { allowed: boolean; reason?: string; currentModuleTitle?: string } {
+    const profile = this.db.profiles.find((p) => p.id === profileId);
+    if (!profile) return { allowed: false, reason: 'Student profile not found.' };
+
+    if (profile.current_year === 'year_1') {
+      return {
+        allowed: false,
+        reason: '1st Year students are enrolled in Common Foundation. Specialization streams begin in 2nd Year.',
+      };
+    }
+
+    // Find applicable topics for this student
+    const applicableTopics = this.getApplicableTopicsForStudent(profileId);
+    const progressRecords = this.db.topicProgress.filter((tp) => tp.student_id === profileId);
+    const progressMap = new Map(progressRecords.map((tp) => [tp.topic_id, tp.status]));
+
+    // Find modules (categories) for student's current year and track
+    const modules = this.db.categories
+      .filter((c) => c.year_id === profile.current_year && (c.track_id === profile.track_id || c.track_id === 'common'))
+      .sort((a, b) => a.order - b.order);
+
+    for (const mod of modules) {
+      const modTopics = applicableTopics.filter((t) => t.category_id === mod.id && t.is_required);
+      if (modTopics.length === 0) continue;
+
+      const completedCount = modTopics.filter((t) => progressMap.get(t.id) === 'completed').length;
+      if (completedCount < modTopics.length) {
+        return {
+          allowed: false,
+          currentModuleTitle: mod.name,
+          reason: `You must complete all required topics in your current module ("${mod.name}") before switching streams (${completedCount}/${modTopics.length} completed).`,
+        };
+      }
+    }
+
+    return { allowed: true };
   }
 
   public verifyToken(token: string): { userId: string; email: string; role: 'student' | 'admin'; profileId?: string } | null {
@@ -688,9 +746,9 @@ class DBStore {
     return {
       tracks: this.db.tracks,
       years: this.db.years,
-      categories: categories.sort((a, b) => a.order - b.order),
-      topics: topics.sort((a, b) => a.order - b.order),
-      resources: this.db.resources.sort((a, b) => a.display_order - b.display_order),
+      categories: [...categories].sort((a, b) => a.order - b.order),
+      topics: [...topics].sort((a, b) => a.order - b.order),
+      resources: [...this.db.resources].sort((a, b) => a.display_order - b.display_order),
     };
   }
 
@@ -1087,8 +1145,13 @@ class DBStore {
   // --- Project Submissions ---
   public getProjects(filter?: { student_id?: string; status?: string }) {
     let projs = this.db.projects;
-    if (filter?.student_id) {
-      projs = projs.filter((p) => p.student_id === filter.student_id);
+    if (filter && 'student_id' in filter) {
+      if (filter.student_id) {
+        projs = projs.filter((p) => p.student_id === filter.student_id);
+      } else {
+        // If student_id is explicitly passed as null/undefined/empty, return empty list (no match)
+        return [];
+      }
     }
     if (filter?.status && filter.status !== 'all') {
       projs = projs.filter((p) => p.status === filter.status);

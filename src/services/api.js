@@ -63,10 +63,10 @@ async function request(endpoint, options = {}) {
 
 export const api = {
   // Auth
-  login: (identifier, password) =>
+  login: (identifier, password, options = {}) =>
     request('/auth/login', {
       method: 'POST',
-      body: JSON.stringify({ email: identifier, identifier, password }),
+      body: JSON.stringify({ email: identifier, identifier, password, ...options }),
     }),
   signup: (signupData) =>
     request('/auth/signup', {
@@ -74,6 +74,12 @@ export const api = {
       body: JSON.stringify(signupData),
     }),
   getMe: () => request('/auth/me'),
+  getTrackStatus: () => request('/auth/me/track-status'),
+  updateTrack: (track_id) =>
+    request('/auth/me/track', {
+      method: 'PUT',
+      body: JSON.stringify({ track_id }),
+    }),
   updateYear: (year, track_id) =>
     request('/auth/me/year', {
       method: 'PUT',

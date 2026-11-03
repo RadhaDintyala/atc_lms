@@ -34,7 +34,7 @@ export default function TopicDetailPage({ topicId, onBack, onOpenProjectModal })
         const [topicData, resList, progData] = await Promise.all([
           api.getTopic(topicId),
           api.getResources(topicId),
-          profile?.id ? api.getProgress(profile.id) : null,
+          api.getProgress().catch(() => null),
         ]);
         setTopic(topicData);
         setResources(resList || []);

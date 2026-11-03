@@ -53,11 +53,13 @@ Beacon is a modern, production-grade Learning Management System (LMS) engineered
 - **Student Dossier & Analytics**: Monitor student progress percentage, active topics, approved projects, and perform permanent account deletions.
 - **Curriculum Content Management**: Add, modify, or archive topics and resources dynamically.
 
-### 🔒 Hardened Authentication & Session Lifecycle
-- **JWT Authentication**: Secure Bearer token issued on login.
+### 🔒 Hardened Authentication & Cohort Policy
+- **JWT Authentication**: Secure Bearer token issued on login with authoritatively derived profile scopes to prevent cross-user session leakage.
 - **Roster-Only Access (No Public Signup)**: Public registration is completely disabled for both students and administrators. Access is strictly granted to pre-authorized accounts.
-- **Student ID & Password Authentication**: Students log in using their assigned Student ID (e.g. `ATC2602003`) or Full Name and password.
-- **Active Session Validation**: Backend verifies user status on every authenticated request (`requireAuth`), returning `401 Unauthorized` if an account is invalidated.
+- **Student ID & Password Authentication**: Students log in using their assigned Student ID (e.g. `ATC2602003`) and password.
+- **Academic Year Opt-In on Login (Permanently Locked)**: Students choose their Academic Year (`1st Year Foundation`, `2nd Year Core Track`, or `3rd Year Capstone`) and Specialization Stream on initial login. Once set, **the academic year is permanently locked** and cannot be edited by the student.
+- **Module-Gated Specialization Stream Switching**: Students in 2nd and 3rd year can switch between `Full-Stack & App Dev` and `AI Engineering`, **strictly only after completing all required topics in their active curriculum module**. First-year students remain in Common Foundation.
+- **Active Session Validation & Isolation**: Backend validates user status on every authenticated request (`requireAuth`), returning `401 Unauthorized` if an account is invalidated.
 - **Client Auto-Logout on 401**: Interceptors immediately clear session tokens from `localStorage` upon 401 status and display clear validation feedback.
 
 ---
@@ -66,33 +68,6 @@ Beacon is a modern, production-grade Learning Management System (LMS) engineered
 
 Public self-signup is disabled. Only pre-provisioned accounts can access the platform:
 
-### A. Super Admin Access
-| Field | Value |
-|---|---|
-| **Role** | Admin (Select the **Admin** tab on login) |
-| **Name** | Super Admin |
-| **Email** | `beacon.atc@gmail.om` *(or `beacon.atc@gmail.com`)* |
-| **Password** | `test@beacon.com` |
-
-> [!NOTE]
-> Administrators must select the **Admin** tab and manually enter their authorized email and password.
-
-### B. Authorized Student Roster
-Students select the **Student** tab and authenticate with their **Student ID** (or Full Name) and password:
-
-| Student Name | Student ID | Password | Department & Track |
-|---|---|---|---|
-| Gonuguntla Nischal | `ATC2602003` | `ATCY26B1001` | CSE • 1st Year (Common Foundation) |
-| Shaik Syeda Aneesa | `ATC2602004` | `ATCY26B1002` | CSE • 1st Year (Common Foundation) |
-| Kocherla Steven Upadesh | `ATC2602005` | `ATCY26B1003` | CSE • 1st Year (Common Foundation) |
-| P.Harshath | `ATC2602006` | `ATCY26B1004` | CSE • 1st Year (Common Foundation) |
-| Sivaparvathi Narikella | `ATC2602007` | `ATCY26B1005` | CSE • 1st Year (Common Foundation) |
-| Thirumalareddy Sharath Reddy | `ATC2602008` | `ATCY26B1006` | CSE • 1st Year (Common Foundation) |
-
-> [!TIP]
-> If an incorrect ID or password is submitted, the system prompts: *"Please recheck your password and id."*
-
----
 
 ## 4. Local Development Setup
 
@@ -164,9 +139,11 @@ The platform is designed to be deployed as a separated decoupled architecture:
 | Method | Endpoint | Access | Description |
 |---|---|---|---|
 | `GET` | `/` | Public | Healthcheck and server identity |
-| `POST` | `/api/auth/login` | Public | Authenticate user & issue JWT token |
-| `POST` | `/api/auth/register` | Public | Register new student profile |
-| `GET` | `/api/auth/me` | Authenticated | Fetch current user session details |
+| `POST` | `/api/auth/login` | Public | Authenticate user (Student ID or Admin Email) & issue JWT token |
+| `GET` | `/api/auth/me` | Authenticated | Fetch current user session details & profile |
+| `GET` | `/api/auth/me/track-status` | Student | Verify eligibility to switch specialization streams based on module completion |
+| `PUT` | `/api/auth/me/track` | Student | Switch specialization stream (`fullstack` / `ai`) after active module is complete |
+| `PUT` | `/api/auth/me/year` | Student | Locked by institutional policy (`403 Forbidden`) |
 | `GET` | `/api/curriculum/tracks` | Authenticated | List all curriculum tracks & years |
 | `GET` | `/api/curriculum/topics` | Authenticated | List topics with completion status |
 | `PATCH`| `/api/curriculum/topics/:id/progress` | Student | Update topic/resource progress |

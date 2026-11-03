@@ -86,7 +86,7 @@ export default function ProjectsModule({ initialTopicForProject, onClearInitialT
     if (!profile?.id) return;
     try {
       setLoading(true);
-      const data = await api.getProjects({ student_id: profile.id });
+      const data = await api.getProjects();
       setSubmissions(data || []);
     } catch (err) {
       console.error('Failed to load submissions:', err);
@@ -96,6 +96,7 @@ export default function ProjectsModule({ initialTopicForProject, onClearInitialT
   };
 
   useEffect(() => {
+    setSubmissions([]);
     loadSubmissions();
   }, [profile?.id]);
 

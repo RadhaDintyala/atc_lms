@@ -21,12 +21,20 @@ export default function AuthPage() {
   const [signInLoading, setSignInLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState(null);
 
+  // Student Cohort & Stream Choice on Login
+  const [selectedYear, setSelectedYear] = useState('year_1'); // 'year_1' | 'year_2' | 'year_3'
+  const [selectedTrack, setSelectedTrack] = useState('fullstack'); // 'fullstack' | 'ai'
+
   // Handle switching between Student and Admin role
   const handleRoleSelect = (selectedRole) => {
     setRole(selectedRole);
     setErrorMsg(null);
     setSignInIdentifier('');
     setSignInPassword('');
+  };
+
+  const handleYearChange = (year) => {
+    setSelectedYear(year);
   };
 
   const handleSignIn = async (e) => {
@@ -43,7 +51,14 @@ export default function AuthPage() {
     }
     try {
       setSignInLoading(true);
-      await login(identifierClean, signInPassword);
+      if (role === 'student') {
+        await login(identifierClean, signInPassword, {
+          year: selectedYear,
+          track_id: selectedYear === 'year_1' ? 'common' : selectedTrack,
+        });
+      } else {
+        await login(identifierClean, signInPassword);
+      }
     } catch (err) {
       if (role === 'student') {
         setErrorMsg('Please recheck your password and id.');
@@ -190,6 +205,100 @@ export default function AuthPage() {
                 />
               </div>
             </div>
+
+            {role === 'student' && (
+              <div className="space-y-3 pt-2 border-t border-[#27272A]">
+                {/* Year of Study Selection */}
+                <div>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="block text-[11px] font-bold text-[#A1A1AA] uppercase tracking-wider">
+                      Academic Year
+                    </label>
+                    <span className="text-[10px] text-[#F9C321] font-semibold">Locked once set</span>
+                  </div>
+                  <div className="grid grid-cols-3 gap-1.5">
+                    {[
+                      { id: 'year_1', label: '1st Year', sub: 'Foundation' },
+                      { id: 'year_2', label: '2nd Year', sub: 'Core Track' },
+                      { id: 'year_3', label: '3rd Year', sub: 'Capstone' },
+                    ].map((yr) => (
+                      <button
+                        key={yr.id}
+                        type="button"
+                        onClick={() => handleYearChange(yr.id)}
+                        className={`p-2 rounded-lg text-left border transition-all cursor-pointer ${
+                          selectedYear === yr.id
+                            ? 'bg-[#F9C321] text-[#111111] border-[#F9C321] font-bold shadow-sm'
+                            : 'bg-[#111111] text-[#D4D4D8] border-[#333333] hover:border-[#52525B]'
+                        }`}
+                      >
+                        <div className="text-xs font-bold leading-tight">{yr.label}</div>
+                        <div className={`text-[10px] ${selectedYear === yr.id ? 'text-[#111111]' : 'text-[#71717A]'}`}>
+                          {yr.sub}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Specialization Stream Selection */}
+                <div>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="block text-[11px] font-bold text-[#A1A1AA] uppercase tracking-wider">
+                      Specialization Stream
+                    </label>
+                    {selectedYear !== 'year_1' && (
+                      <span className="text-[10px] text-[#A1A1AA]">Switchable per module</span>
+                    )}
+                  </div>
+
+                  {selectedYear === 'year_1' ? (
+                    <div className="p-2.5 rounded-lg bg-[#111111] border border-[#27272A] text-xs text-[#A1A1AA] flex items-center justify-between">
+                      <div>
+                        <span className="font-bold text-white block">Common Foundation</span>
+                        <span className="text-[10px] text-[#71717A]">Unified curriculum for all 1st-year students</span>
+                      </div>
+                      <span className="text-[10px] px-2 py-0.5 rounded bg-[#27272A] text-[#F9C321] font-bold">Standard</span>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setSelectedTrack('fullstack')}
+                        className={`p-2.5 rounded-lg text-left border transition-all cursor-pointer ${
+                          selectedTrack === 'fullstack'
+                            ? 'bg-[#F9C321] text-[#111111] border-[#F9C321] font-bold shadow-sm'
+                            : 'bg-[#111111] text-[#D4D4D8] border-[#333333] hover:border-[#52525B]'
+                        }`}
+                      >
+                        <div className="text-xs font-bold">Full-Stack & App Dev</div>
+                        <div className={`text-[10px] ${selectedTrack === 'fullstack' ? 'text-[#111111]' : 'text-[#71717A]'}`}>
+                          Web, Mobile & Cloud
+                        </div>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedTrack('ai')}
+                        className={`p-2.5 rounded-lg text-left border transition-all cursor-pointer ${
+                          selectedTrack === 'ai'
+                            ? 'bg-[#F9C321] text-[#111111] border-[#F9C321] font-bold shadow-sm'
+                            : 'bg-[#111111] text-[#D4D4D8] border-[#333333] hover:border-[#52525B]'
+                        }`}
+                      >
+                        <div className="text-xs font-bold">AI Engineering</div>
+                        <div className={`text-[10px] ${selectedTrack === 'ai' ? 'text-[#111111]' : 'text-[#71717A]'}`}>
+                          ML, LLMs & Pipelines
+                        </div>
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                <div className="text-[10px] text-[#71717A] leading-relaxed pt-1">
+                  🔒 Academic year is locked upon login. Stream can only be switched after completing all required topics in your current module.
+                </div>
+              </div>
+            )}
 
             <button
               type="submit"

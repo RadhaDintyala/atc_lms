@@ -87,7 +87,15 @@ const requireAuth = (req: AuthRequest, res: Response, next: NextFunction): void 
     res.status(401).json({ error: 'Account not found or deactivated' });
     return;
   }
-  req.user = payload;
+
+  // Derive profile directly from the authoritative database, ensuring complete session isolation
+  const profile = dbStore.getProfileByUserId(user.id);
+  req.user = {
+    userId: user.id,
+    email: user.email,
+    role: user.role,
+    profileId: profile?.id,
+  };
   next();
 };
 
@@ -106,13 +114,13 @@ const requireAdmin = (req: AuthRequest, res: Response, next: NextFunction): void
 // 1. Auth Endpoints
 app.post('/api/auth/login', (req: Request, res: Response) => {
   try {
-    const { email, identifier, id, student_id, password } = req.body;
+    const { email, identifier, id, student_id, password, year, track_id } = req.body;
     const loginIdentifier = (identifier || id || student_id || email || '').trim();
     if (!loginIdentifier || !password) {
       res.status(400).json({ error: 'Please enter both your ID and password.' });
       return;
     }
-    const result = dbStore.authenticate(loginIdentifier, password);
+    const result = dbStore.authenticate(loginIdentifier, password, { year, track_id });
     if (!result) {
       res.status(401).json({ error: 'Please recheck your password and id.' });
       return;
@@ -183,40 +191,51 @@ app.post('/api/auth/signup', (req: Request, res: Response) => {
   }
 });
 
-// Update Year of Study for Student
-app.put('/api/auth/me/year', requireAuth, (req: AuthRequest, res: Response) => {
+// Track Eligibility Check for Student Stream Switching
+app.get('/api/auth/me/track-status', requireAuth, (req: AuthRequest, res: Response) => {
   try {
     const profileId = req.user?.profileId;
     if (!profileId) {
-      res.status(403).json({ error: 'Only student accounts can update year of study' });
+      res.status(403).json({ error: 'Only student accounts can check stream status' });
       return;
     }
-    const { year, track_id } = req.body;
-    if (!year || !['year_1', 'year_2', 'year_3'].includes(year)) {
-      res.status(400).json({ error: 'Valid year is required (year_1, year_2, year_3)' });
+    const status = dbStore.canStudentChangeTrack(profileId);
+    res.json(status);
+  } catch (err: any) {
+    res.status(400).json({ error: err.message || 'Failed to check track status' });
+  }
+});
+
+// Switch Specialization Stream (Allowed only after completing current module)
+app.put('/api/auth/me/track', requireAuth, (req: AuthRequest, res: Response) => {
+  try {
+    const profileId = req.user?.profileId;
+    if (!profileId) {
+      res.status(403).json({ error: 'Only student accounts can switch specialization stream' });
       return;
     }
-
-    let targetTrack = track_id;
-    if (!targetTrack) {
-      targetTrack = year === 'year_1' ? 'common' : 'fullstack';
-    }
-
-    const currentProfile = dbStore.getProfileById(profileId);
-    if (!currentProfile) {
-      res.status(404).json({ error: 'Student profile not found' });
+    const { track_id } = req.body;
+    if (!track_id || !['fullstack', 'ai'].includes(track_id)) {
+      res.status(400).json({ error: 'Valid stream is required (fullstack or ai)' });
       return;
     }
-
-    const updated = dbStore.updateStudentProfile(profileId, {
-      current_year: year,
-      track_id: targetTrack,
-    });
-
+    const status = dbStore.canStudentChangeTrack(profileId);
+    if (!status.allowed) {
+      res.status(403).json({ error: status.reason || 'Cannot switch stream until current module is complete.' });
+      return;
+    }
+    const updated = dbStore.updateStudentProfile(profileId, { track_id });
     res.json(updated);
   } catch (err: any) {
-    res.status(400).json({ error: err.message || 'Failed to update year' });
+    res.status(400).json({ error: err.message || 'Failed to switch stream' });
   }
+});
+
+// Update Year of Study (Strictly locked: students cannot edit academic year)
+app.put('/api/auth/me/year', requireAuth, (req: AuthRequest, res: Response) => {
+  res.status(403).json({
+    error: 'Academic year is locked and cannot be edited after initial selection.',
+  });
 });
 
 // 2. Student Management (Admin & Self)
@@ -448,13 +467,18 @@ app.delete('/api/resources/:id', requireAdmin, (req: Request, res: Response) => 
 
 // 4. Progress Tracking
 app.get('/api/progress', requireAuth, (req: AuthRequest, res: Response) => {
-  const profileId = (req.query.student_id as string) || req.user?.profileId;
-  if (!profileId) {
-    res.status(400).json({ error: 'Student ID required' });
-    return;
+  let profileId: string | undefined;
+
+  if (req.user?.role === 'admin') {
+    // Admin may inspect a specific student's progress via query parameter or their own
+    profileId = (req.query.student_id as string) || req.user?.profileId;
+  } else {
+    // For students: ALWAYS enforce session isolation. Derive profile strictly from authenticated token
+    profileId = req.user?.profileId;
   }
-  if (req.user?.role !== 'admin' && req.user?.profileId !== profileId) {
-    res.status(403).json({ error: 'Forbidden' });
+
+  if (!profileId) {
+    res.status(400).json({ error: 'Student profile not found for this account' });
     return;
   }
 
@@ -517,7 +541,12 @@ app.get('/api/projects', requireAuth, (req: AuthRequest, res: Response) => {
     const list = dbStore.getProjects({ student_id: studentId, status });
     res.json(list);
   } else {
+    // For students: strictly isolate project list to authenticated user profile
     const profileId = req.user?.profileId;
+    if (!profileId) {
+      res.json([]);
+      return;
+    }
     const list = dbStore.getProjects({ student_id: profileId, status });
     res.json(list);
   }

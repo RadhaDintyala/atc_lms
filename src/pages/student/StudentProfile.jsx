@@ -36,12 +36,13 @@ export default function StudentProfile() {
     async function loadProgress() {
       if (!profile?.id) return;
       try {
-        const data = await api.getProgress(profile.id);
+        const data = await api.getProgress();
         setProgress(data);
       } catch (err) {
         console.error('Failed to load profile progress:', err);
       }
     }
+    setProgress(null);
     loadProgress();
   }, [profile?.id]);
 
