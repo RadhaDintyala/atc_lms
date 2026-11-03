@@ -160,7 +160,7 @@ export default function AuthPage() {
                   onChange={(e) => setSignInIdentifier(e.target.value)}
                   placeholder={
                     role === 'admin'
-                      ? 'Enter admin email (e.g. beacon.atc@gmail.om)'
+                      ? 'Enter admin email'
                       : 'e.g. ATC260xxxx'
                   }
                   className="w-full pl-9 pr-3 py-2 rounded-lg bg-[#111111] border border-[#333333] text-white placeholder-[#71717A] text-xs focus:outline-none focus:border-[#F9C321] focus:ring-1 focus:ring-[#F9C321] transition-colors"
