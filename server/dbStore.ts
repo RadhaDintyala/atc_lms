@@ -16,7 +16,7 @@ import {
   Project,
   ActivityLog,
 } from './types.ts';
-import { generateSeedData } from './seedData.ts';
+import { generateSeedData, OFFICIAL_STUDENTS } from './seedData.ts';
 import { PROJECT_CATALOG } from '../src/data/projectCatalog.js';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'beacon-engineering-lms-jwt-secret-key-2026';
@@ -61,6 +61,7 @@ class DBStore {
         this.db = parsed;
         this.syncProjectTopicProgress();
         this.ensureSuperAdmin();
+        this.ensureOfficialStudents();
         this.purgeSeedStudentsAndProjects();
         this.saveToDisk(this.db);
         return this.db;
@@ -100,6 +101,71 @@ class DBStore {
           created_at: new Date().toISOString(),
           status: 'active',
         });
+      }
+    }
+  }
+
+  private ensureOfficialStudents(): void {
+    if (!this.db?.users || !this.db?.profiles) return;
+
+    for (const s of OFFICIAL_STUDENTS) {
+      const email = `${s.id.toLowerCase()}@beacon.atc`;
+      const passHash = bcrypt.hashSync(s.passwordPlain, 10);
+      const userId = `usr-${s.id.toLowerCase()}`;
+      const profId = `prof-${s.id.toLowerCase()}`;
+
+      let user = this.db.users.find(
+        (u) =>
+          u.email.toLowerCase() === email.toLowerCase() ||
+          u.id === userId ||
+          (u.full_name && u.full_name.trim().toLowerCase() === s.fullName.trim().toLowerCase())
+      );
+
+      if (user) {
+        user.full_name = s.fullName;
+        user.password_hash = passHash;
+        user.status = 'active';
+        user.role = 'student';
+      } else {
+        user = {
+          id: userId,
+          email,
+          password_hash: passHash,
+          role: 'student',
+          full_name: s.fullName,
+          created_at: new Date().toISOString(),
+          status: 'active',
+        };
+        this.db.users.push(user);
+      }
+
+      let profile = this.db.profiles.find(
+        (p) =>
+          p.user_id === user!.id ||
+          p.id === profId ||
+          (p.roll_number && p.roll_number.trim().toLowerCase() === s.id.trim().toLowerCase())
+      );
+
+      if (profile) {
+        profile.user_id = user.id;
+        profile.roll_number = s.id;
+        profile.college = 'Beacon Institute of Technology';
+        profile.department = s.department || 'Computer Science & Engineering';
+        profile.current_year = s.currentYear || 'year_1';
+        profile.track_id = s.trackId || 'common';
+      } else {
+        profile = {
+          id: profId,
+          user_id: user.id,
+          roll_number: s.id,
+          college: 'Beacon Institute of Technology',
+          department: s.department || 'Computer Science & Engineering',
+          current_year: s.currentYear || 'year_1',
+          track_id: s.trackId || 'common',
+          created_at: new Date().toISOString(),
+          last_active_at: new Date().toISOString(),
+        };
+        this.db.profiles.push(profile);
       }
     }
   }
@@ -260,6 +326,7 @@ class DBStore {
           this.db = (stateDoc as any).data as DatabaseSchema;
           this.syncProjectTopicProgress();
           this.ensureSuperAdmin();
+          this.ensureOfficialStudents();
           this.purgeSeedStudentsAndProjects();
           try {
             fs.writeFileSync(DB_FILE, JSON.stringify(this.db, null, 2), 'utf-8');
@@ -341,14 +408,36 @@ class DBStore {
   }
 
   // --- Auth & Users ---
-  public authenticate(email: string, passwordPlain: string): { token: string; user: User; profile?: StudentProfile } | null {
-    const user = this.db.users.find((u) => u.email.toLowerCase() === email.toLowerCase());
+  public authenticate(identifier: string, passwordPlain: string): { token: string; user: User; profile?: StudentProfile } | null {
+    if (!identifier || !passwordPlain) return null;
+    const cleanId = identifier.trim().toLowerCase();
+
+    // 1. Check by direct email match
+    let user = this.db.users.find((u) => u.email.toLowerCase() === cleanId);
+
+    // 2. Check by student ID / roll number (e.g. ATC2602003)
+    if (!user) {
+      const profile = this.db.profiles.find(
+        (p) => p.roll_number && p.roll_number.trim().toLowerCase() === cleanId
+      );
+      if (profile) {
+        user = this.db.users.find((u) => u.id === profile.user_id);
+      }
+    }
+
+    // 3. Check by full name (e.g. "Gonuguntla Nischal")
+    if (!user) {
+      user = this.db.users.find(
+        (u) => u.full_name && u.full_name.trim().toLowerCase() === cleanId
+      );
+    }
+
     if (!user) return null;
     if (user.status !== 'active') {
       throw new Error('Account is deactivated. Please contact your administrator.');
     }
 
-    const isValid = bcrypt.compareSync(passwordPlain, user.password_hash);
+    const isValid = bcrypt.compareSync(passwordPlain.trim(), user.password_hash);
     if (!isValid) return null;
 
     const profile = this.db.profiles.find((p) => p.user_id === user.id);

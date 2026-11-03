@@ -55,17 +55,19 @@ Beacon is a modern, production-grade Learning Management System (LMS) engineered
 
 ### 🔒 Hardened Authentication & Session Lifecycle
 - **JWT Authentication**: Secure Bearer token issued on login.
-- **Active Session Validation**: Backend verifies user status on every authenticated request (`requireAuth`), returning `401 Unauthorized` if an account was removed or invalidated.
-- **Client Auto-Logout on 401**: Axios response interceptors immediately wipe tokens from `localStorage` and trigger reactive logout with user prompt when credentials expire.
-- **Clean Slate Policy**: Production database contains **zero mock/dummy students**. New students register directly through the portal.
+- **Roster-Only Access (No Public Signup)**: Public registration is completely disabled for both students and administrators. Access is strictly granted to pre-authorized accounts.
+- **Student ID & Password Authentication**: Students log in using their assigned Student ID (e.g. `ATC2602003`) or Full Name and password.
+- **Active Session Validation**: Backend verifies user status on every authenticated request (`requireAuth`), returning `401 Unauthorized` if an account is invalidated.
+- **Client Auto-Logout on 401**: Interceptors immediately clear session tokens from `localStorage` upon 401 status and display clear validation feedback.
 
 ---
 
-## 3. Super Admin Credentials
+## 3. Access Credentials & Authorized Roster
 
-The administrative portal is protected and restricts access to authenticated mentors and administrators:
+Public self-signup is disabled. Only pre-provisioned accounts can access the platform:
 
-| Field | Production Value |
+### A. Super Admin Access
+| Field | Value |
 |---|---|
 | **Role** | Admin (Select the **Admin** tab on login) |
 | **Name** | Super Admin |
@@ -73,7 +75,22 @@ The administrative portal is protected and restricts access to authenticated men
 | **Password** | `test@beacon.com` |
 
 > [!NOTE]
-> When the **Admin** tab is selected on the login page, account registration is disabled. Super Admin credentials are **not** auto-filled; administrators must manually type their authorized email and password into the respective input fields.
+> Administrators must select the **Admin** tab and manually enter their authorized email and password.
+
+### B. Authorized Student Roster
+Students select the **Student** tab and authenticate with their **Student ID** (or Full Name) and password:
+
+| Student Name | Student ID | Password | Department & Track |
+|---|---|---|---|
+| Gonuguntla Nischal | `ATC2602003` | `ATCY26B1001` | CSE • 1st Year (Common Foundation) |
+| Shaik Syeda Aneesa | `ATC2602004` | `ATCY26B1002` | CSE • 1st Year (Common Foundation) |
+| Kocherla Steven Upadesh | `ATC2602005` | `ATCY26B1003` | CSE • 1st Year (Common Foundation) |
+| P.Harshath | `ATC2602006` | `ATCY26B1004` | CSE • 1st Year (Common Foundation) |
+| Sivaparvathi Narikella | `ATC2602007` | `ATCY26B1005` | CSE • 1st Year (Common Foundation) |
+| Thirumalareddy Sharath Reddy | `ATC2602008` | `ATCY26B1006` | CSE • 1st Year (Common Foundation) |
+
+> [!TIP]
+> If an incorrect ID or password is submitted, the system prompts: *"Please recheck your password and id."*
 
 ---
 

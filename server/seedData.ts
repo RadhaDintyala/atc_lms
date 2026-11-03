@@ -86,6 +86,67 @@ interface CuratedTopicDef {
   resources: CuratedResourceDef[];
 }
 
+// Official student roster authorized for ATC LMS
+export interface OfficialStudentDef {
+  fullName: string;
+  id: string;
+  passwordPlain: string;
+  department?: string;
+  currentYear?: 'year_1' | 'year_2' | 'year_3';
+  trackId?: 'common' | 'fullstack' | 'ai';
+}
+
+export const OFFICIAL_STUDENTS: OfficialStudentDef[] = [
+  {
+    fullName: 'Gonuguntla Nischal',
+    id: 'ATC2602003',
+    passwordPlain: 'ATCY26B1001',
+    department: 'Computer Science & Engineering',
+    currentYear: 'year_1',
+    trackId: 'common',
+  },
+  {
+    fullName: 'Shaik Syeda Aneesa',
+    id: 'ATC2602004',
+    passwordPlain: 'ATCY26B1002',
+    department: 'Computer Science & Engineering',
+    currentYear: 'year_1',
+    trackId: 'common',
+  },
+  {
+    fullName: 'Kocherla Steven Upadesh',
+    id: 'ATC2602005',
+    passwordPlain: 'ATCY26B1003',
+    department: 'Computer Science & Engineering',
+    currentYear: 'year_1',
+    trackId: 'common',
+  },
+  {
+    fullName: 'P.Harshath',
+    id: 'ATC2602006',
+    passwordPlain: 'ATCY26B1004',
+    department: 'Computer Science & Engineering',
+    currentYear: 'year_1',
+    trackId: 'common',
+  },
+  {
+    fullName: 'Sivaparvathi Narikella',
+    id: 'ATC2602007',
+    passwordPlain: 'ATCY26B1005',
+    department: 'Computer Science & Engineering',
+    currentYear: 'year_1',
+    trackId: 'common',
+  },
+  {
+    fullName: 'Thirumalareddy Sharath Reddy',
+    id: 'ATC2602008',
+    passwordPlain: 'ATCY26B1006',
+    department: 'Computer Science & Engineering',
+    currentYear: 'year_1',
+    trackId: 'common',
+  },
+];
+
 export function generateSeedData() {
   const categories: Category[] = [
     // Year 1 Categories
@@ -723,8 +784,33 @@ export function generateSeedData() {
     },
   ];
 
-  // No seed students or projects - clean production slate
+  // Official student profiles
   const sampleProfiles: StudentProfile[] = [];
+  OFFICIAL_STUDENTS.forEach((s) => {
+    const userId = `usr-${s.id.toLowerCase()}`;
+    const profId = `prof-${s.id.toLowerCase()}`;
+    sampleUsers.push({
+      id: userId,
+      email: `${s.id.toLowerCase()}@beacon.atc`,
+      password_hash: hashPassword(s.passwordPlain),
+      role: 'student',
+      full_name: s.fullName,
+      created_at: '2026-08-01T08:00:00Z',
+      status: 'active',
+    });
+    sampleProfiles.push({
+      id: profId,
+      user_id: userId,
+      roll_number: s.id,
+      college: 'Beacon Institute of Technology',
+      department: s.department || 'Computer Science & Engineering',
+      current_year: s.currentYear || 'year_1',
+      track_id: s.trackId || 'common',
+      created_at: '2026-08-01T08:00:00Z',
+      last_active_at: '2026-08-01T08:00:00Z',
+    });
+  });
+
   const topicProgress: StudentTopicProgress[] = [];
   const resourceProgress: StudentResourceProgress[] = [];
   const projects: Project[] = [];

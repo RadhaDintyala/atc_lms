@@ -106,14 +106,15 @@ const requireAdmin = (req: AuthRequest, res: Response, next: NextFunction): void
 // 1. Auth Endpoints
 app.post('/api/auth/login', (req: Request, res: Response) => {
   try {
-    const { email, password } = req.body;
-    if (!email || !password) {
-      res.status(400).json({ error: 'Email and password are required' });
+    const { email, identifier, id, student_id, password } = req.body;
+    const loginIdentifier = (identifier || id || student_id || email || '').trim();
+    if (!loginIdentifier || !password) {
+      res.status(400).json({ error: 'Please enter both your ID and password.' });
       return;
     }
-    const result = dbStore.authenticate(email, password);
+    const result = dbStore.authenticate(loginIdentifier, password);
     if (!result) {
-      res.status(401).json({ error: 'Invalid email or password' });
+      res.status(401).json({ error: 'Please recheck your password and id.' });
       return;
     }
     const { token, user, profile } = result;
@@ -135,10 +136,14 @@ app.get('/api/auth/me', requireAuth, (req: AuthRequest, res: Response) => {
   res.json({ user: safeUser, profile });
 });
 
-// Signup Route (Supports both Student & Admin)
+// Signup Route (Student signup disabled; Admin creation only)
 app.post('/api/auth/signup', (req: Request, res: Response) => {
   try {
     const { role, full_name, email, password, year, track_id, college, department, roll_number } = req.body;
+    if (role === 'student') {
+      res.status(403).json({ error: 'Student registration is disabled. Please contact your administrator for your Student ID and password.' });
+      return;
+    }
     if (!email || !password || !full_name) {
       res.status(400).json({ error: 'Full name, email, and password are required' });
       return;
