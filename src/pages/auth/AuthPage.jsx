@@ -176,7 +176,7 @@ export default function AuthPage() {
                   placeholder={
                     role === 'admin'
                       ? 'Enter admin email'
-                      : 'e.g. ATC2602003 or Gonuguntla Nischal'
+                      : 'ID or Name'
                   }
                   className="w-full pl-9 pr-3 py-2 rounded-lg bg-[#111111] border border-[#333333] text-white placeholder-[#71717A] text-xs focus:outline-none focus:border-[#F9C321] focus:ring-1 focus:ring-[#F9C321] transition-colors"
                 />
@@ -199,7 +199,7 @@ export default function AuthPage() {
                   placeholder={
                     role === 'admin'
                       ? 'Enter admin password'
-                      : 'e.g. ATCY26B1001'
+                      : 'e.g. ATCY26Bxxxx'
                   }
                   className="w-full pl-9 pr-3 py-2 rounded-lg bg-[#111111] border border-[#333333] text-white placeholder-[#71717A] text-xs focus:outline-none focus:border-[#F9C321] focus:ring-1 focus:ring-[#F9C321] transition-colors"
                 />
