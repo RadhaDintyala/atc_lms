@@ -225,7 +225,7 @@ app.put('/api/auth/me/track', requireAuth, (req: AuthRequest, res: Response) => 
       return;
     }
     const updated = dbStore.updateStudentProfile(profileId, { track_id });
-    res.json(updated);
+    res.json(updated.profile);
   } catch (err: any) {
     res.status(400).json({ error: err.message || 'Failed to switch stream' });
   }

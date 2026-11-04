@@ -158,7 +158,7 @@ export default function AuthPage() {
 
             <div>
               <label className="block text-[11px] font-bold text-[#A1A1AA] uppercase tracking-wider mb-1.5">
-                {role === 'admin' ? 'Email Address' : 'Student ID'}
+                {role === 'admin' ? 'Email Address' : 'Student ID or Full Name'}
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#71717A]">
@@ -176,7 +176,7 @@ export default function AuthPage() {
                   placeholder={
                     role === 'admin'
                       ? 'Enter admin email'
-                      : 'e.g. ATC260xxxx'
+                      : 'e.g. ATC2602003 or Gonuguntla Nischal'
                   }
                   className="w-full pl-9 pr-3 py-2 rounded-lg bg-[#111111] border border-[#333333] text-white placeholder-[#71717A] text-xs focus:outline-none focus:border-[#F9C321] focus:ring-1 focus:ring-[#F9C321] transition-colors"
                 />
@@ -199,7 +199,7 @@ export default function AuthPage() {
                   placeholder={
                     role === 'admin'
                       ? 'Enter admin password'
-                      : 'Enter student password'
+                      : 'e.g. ATCY26B1001'
                   }
                   className="w-full pl-9 pr-3 py-2 rounded-lg bg-[#111111] border border-[#333333] text-white placeholder-[#71717A] text-xs focus:outline-none focus:border-[#F9C321] focus:ring-1 focus:ring-[#F9C321] transition-colors"
                 />

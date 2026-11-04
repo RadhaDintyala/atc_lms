@@ -496,25 +496,42 @@ class DBStore {
     const progressRecords = this.db.topicProgress.filter((tp) => tp.student_id === profileId);
     const progressMap = new Map(progressRecords.map((tp) => [tp.topic_id, tp.status]));
 
-    // Find modules (categories) for student's current year and track
+    // Find modules (categories) for student's current year and track in curriculum order
     const modules = this.db.categories
       .filter((c) => c.year_id === profile.current_year && (c.track_id === profile.track_id || c.track_id === 'common'))
       .sort((a, b) => a.order - b.order);
 
-    for (const mod of modules) {
+    let completedAnyModule = false;
+
+    for (let i = 0; i < modules.length; i++) {
+      const mod = modules[i];
       const modTopics = applicableTopics.filter((t) => t.category_id === mod.id && t.is_required);
       if (modTopics.length === 0) continue;
 
       const completedCount = modTopics.filter((t) => progressMap.get(t.id) === 'completed').length;
-      if (completedCount < modTopics.length) {
-        return {
-          allowed: false,
-          currentModuleTitle: mod.name,
-          reason: `You must complete all required topics in your current module ("${mod.name}") before switching streams (${completedCount}/${modTopics.length} completed).`,
-        };
+      const inProgressCount = modTopics.filter((t) => progressMap.get(t.id) === 'in_progress').length;
+
+      if (completedCount === modTopics.length) {
+        // Module is 100% finished
+        completedAnyModule = true;
+        continue;
       }
+
+      // If a previous module was completed and the student has not yet started this module,
+      // the student is at a clean module transition and eligible to change streams
+      if (completedAnyModule && completedCount === 0 && inProgressCount === 0) {
+        return { allowed: true };
+      }
+
+      // Otherwise, this is the current active module in progress that must be finished
+      return {
+        allowed: false,
+        currentModuleTitle: mod.name,
+        reason: `You must complete all required topics in your current module ("${mod.name}") before switching streams (${completedCount}/${modTopics.length} completed).`,
+      };
     }
 
+    // All modules completed
     return { allowed: true };
   }
 
