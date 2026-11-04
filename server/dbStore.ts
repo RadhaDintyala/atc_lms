@@ -573,6 +573,7 @@ class DBStore {
         email: user?.email || '',
         account_status: user?.status || 'inactive',
         progress,
+        overall_percentage: progress.overallPercentage,
         projects_count: studentProjects.length,
         approved_projects_count: studentProjects.filter((p) => p.status === 'approved').length,
         is_inactive_warning: isInactiveWarning,
@@ -586,7 +587,15 @@ class DBStore {
     const user = this.db.users.find((u) => u.id === profile.user_id);
     const progress = this.calculateStudentProgress(profile.id);
     const studentProjects = this.db.projects.filter((p) => p.student_id === profile.id);
-    const topicProgressRecords = this.db.topicProgress.filter((tp) => tp.student_id === profile.id);
+    const topicProgressRecords = this.db.topicProgress
+      .filter((tp) => tp.student_id === profile.id)
+      .map((tp) => {
+        const topic = this.db.topics.find((t) => t.id === tp.topic_id);
+        return {
+          ...tp,
+          topic_title: topic?.title || tp.topic_id,
+        };
+      });
     const resourceProgressRecords = this.db.resourceProgress.filter((rp) => rp.student_id === profile.id);
     const logs = this.db.activityLogs
       .filter((l) => l.student_id === profile.id)
@@ -976,16 +985,6 @@ class DBStore {
       ? Number(((thirdYearCompleted / thirdYearTotal) * 100).toFixed(1))
       : 0;
 
-    // Overall applicable projects and completion
-    const applicableProjectSpecs = PROJECT_CATALOG.filter(
-      (p: any) => p.track_id === 'common' || p.track_id === profile.track_id
-    );
-    const applicableProjectsTotal = applicableProjectSpecs.length;
-    const applicableProjectsCompleted = applicableProjectSpecs.filter((p: any) => submittedTopicIds.has(p.topic_id)).length;
-    const overallPercentage = applicableProjectsTotal > 0
-      ? Number(((applicableProjectsCompleted / applicableProjectsTotal) * 100).toFixed(1))
-      : 0;
-
     // Topics list and counts
     const applicableTopics = this.getApplicableTopicsForStudent(profileId);
     const requiredTopics = applicableTopics.filter((t) => t.is_required);
@@ -1011,6 +1010,17 @@ class DBStore {
 
     const pendingCount = Math.max(0, requiredTopics.length - completedRequiredCount - inProgressCount);
     const nextTopic = applicableTopics.find((t) => !completedTopicIds.has(t.id)) || null;
+
+    // Accurate overall curriculum percentage based on required topics completed
+    const overallPercentage = requiredTopics.length > 0
+      ? Number(((completedRequiredCount / requiredTopics.length) * 100).toFixed(1))
+      : 0;
+
+    const applicableProjectSpecs = PROJECT_CATALOG.filter(
+      (p: any) => p.track_id === 'common' || p.track_id === profile.track_id
+    );
+    const applicableProjectsTotal = applicableProjectSpecs.length;
+    const applicableProjectsCompleted = applicableProjectSpecs.filter((p: any) => submittedTopicIds.has(p.topic_id)).length;
 
     return {
       overallPercentage,
@@ -1046,24 +1056,29 @@ class DBStore {
     const topic = this.db.topics.find((t) => t.id === topicId);
     if (!topic) throw new Error('Topic not found');
 
+    const now = new Date().toISOString();
+
+    // When marked completed, also mark attached resources as completed
     if (status === 'completed') {
-      const projectSpec = PROJECT_CATALOG.find((p: any) => p.topic_id === topicId);
-      if (projectSpec) {
-        const hasProject = this.db.projects.some(
-          (p) =>
-            p.student_id === profileId &&
-            p.topic_id === topicId &&
-            (p.status === 'submitted' || p.status === 'approved' || p.status === 'under_review') &&
-            p.github_url &&
-            p.github_url.trim().length > 0
-        );
-        if (!hasProject) {
-          throw new Error(`Completing "${topic.title}" requires submitting your project with a valid GitHub repository URL in the Projects section.`);
+      const topicResources = this.db.resources.filter((r) => r.topic_id === topicId);
+      for (const res of topicResources) {
+        let rRec = this.db.resourceProgress.find((rp) => rp.student_id === profileId && rp.resource_id === res.id);
+        if (!rRec) {
+          this.db.resourceProgress.push({
+            id: `rp-${profileId}-${res.id}`,
+            student_id: profileId,
+            resource_id: res.id,
+            status: 'completed',
+            completed_at: now,
+            updated_at: now,
+          });
+        } else {
+          rRec.status = 'completed';
+          rRec.completed_at = now;
+          rRec.updated_at = now;
         }
       }
     }
-
-    const now = new Date().toISOString();
     let record = this.db.topicProgress.find((tp) => tp.student_id === profileId && tp.topic_id === topicId);
 
     if (!record) {

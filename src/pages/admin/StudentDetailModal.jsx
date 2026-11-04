@@ -143,7 +143,9 @@ export default function StudentDetailModal({ profileId, isOpen, onClose }) {
                   key={tp.id}
                   className="p-2.5 rounded-lg border border-[#E4E4E7] bg-[#FAFAFA] flex items-center justify-between"
                 >
-                  <span className="font-mono text-[#111111] truncate pr-2 font-semibold">{tp.topic_id}</span>
+                  <span className="text-xs text-[#111111] truncate pr-2 font-semibold" title={tp.topic_title || tp.topic_id}>
+                    {tp.topic_title || tp.topic_id}
+                  </span>
                   <StatusBadge status={tp.status} type="topic" />
                 </div>
               ))}

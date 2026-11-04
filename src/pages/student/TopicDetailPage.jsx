@@ -25,6 +25,7 @@ export default function TopicDetailPage({ topicId, onBack, onOpenProjectModal })
   const [topicStatus, setTopicStatus] = useState('not_started');
   const [loading, setLoading] = useState(true);
   const [updatingResource, setUpdatingResource] = useState(null);
+  const [updatingTopic, setUpdatingTopic] = useState(false);
 
   useEffect(() => {
     async function loadTopic() {
@@ -58,6 +59,39 @@ export default function TopicDetailPage({ topicId, onBack, onOpenProjectModal })
     loadTopic();
   }, [topicId, profile?.id]);
 
+  const handleToggleTopicComplete = async () => {
+    const newStatus = topicStatus === 'completed' ? 'in_progress' : 'completed';
+    try {
+      setUpdatingTopic(true);
+      await api.updateTopicStatus(
+        topicId,
+        newStatus,
+        newStatus === 'completed' ? 'Marked complete by student' : 'Reopened by student'
+      );
+      setTopicStatus(newStatus);
+
+      // If marking as completed, reflect on local resource checkmarks too
+      if (newStatus === 'completed' && resources && resources.length > 0) {
+        setResourceProgressMap((prev) => {
+          const next = new Map(prev);
+          for (const res of resources) {
+            next.set(res.id, 'completed');
+          }
+          return next;
+        });
+      }
+
+      // Notify entire app of progress update
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('beacon:progress-updated'));
+      }
+    } catch (err) {
+      alert(`Error updating topic status: ${err.message}`);
+    } finally {
+      setUpdatingTopic(false);
+    }
+  };
+
   const handleToggleResource = async (resId) => {
     const current = resourceProgressMap.get(resId) || 'not_started';
     const newStatus = current === 'completed' ? 'not_started' : 'completed';
@@ -70,6 +104,9 @@ export default function TopicDetailPage({ topicId, onBack, onOpenProjectModal })
         next.set(resId, newStatus);
         return next;
       });
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('beacon:progress-updated'));
+      }
     } catch (err) {
       alert(`Error updating resource: ${err.message}`);
     } finally {
@@ -131,15 +168,37 @@ export default function TopicDetailPage({ topicId, onBack, onOpenProjectModal })
             </h1>
           </div>
 
-          {/* Status Display */}
-          <div className="flex items-center gap-2 bg-[#FAFAFA] p-2.5 rounded-lg border border-[#E4E4E7] self-start shrink-0">
-            <span className="text-xs font-bold text-[#71717A] pl-1">Status:</span>
-            <StatusBadge status={topicStatus} type="topic" className="text-xs px-2.5 py-1 font-bold" />
-            {topicStatus !== 'completed' && (
-              <span className="text-[11px] text-[#111111] bg-[#FEF9E6] border border-[#F5D365] px-2 py-0.5 rounded font-semibold">
-                Project Required
-              </span>
-            )}
+          {/* Status Display & Mark as Complete Action */}
+          <div className="flex flex-wrap items-center gap-2.5 self-start shrink-0">
+            <div className="flex items-center gap-2 bg-[#FAFAFA] p-2 rounded-lg border border-[#E4E4E7]">
+              <span className="text-xs font-bold text-[#71717A] pl-1">Status:</span>
+              <StatusBadge status={topicStatus} type="topic" className="text-xs px-2.5 py-1 font-bold" />
+            </div>
+
+            <button
+              type="button"
+              onClick={handleToggleTopicComplete}
+              disabled={updatingTopic}
+              className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer shadow-xs ${
+                topicStatus === 'completed'
+                  ? 'bg-[#111111] hover:bg-[#262626] text-white border border-[#111111]'
+                  : 'bg-[#F9C321] hover:bg-[#E5B01D] text-[#111111] border border-[#E5B01D]'
+              }`}
+            >
+              {updatingTopic ? (
+                <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
+              ) : topicStatus === 'completed' ? (
+                <>
+                  <Check className="w-4 h-4 text-[#F9C321] stroke-[3]" />
+                  <span>Completed (Click to Reopen)</span>
+                </>
+              ) : (
+                <>
+                  <Check className="w-4 h-4 text-[#111111] stroke-[3]" />
+                  <span>Mark as Complete</span>
+                </>
+              )}
+            </button>
           </div>
         </div>
 
@@ -308,6 +367,42 @@ export default function TopicDetailPage({ topicId, onBack, onOpenProjectModal })
             })}
           </div>
         )}
+      </div>
+
+      {/* Bottom Completion Callout */}
+      <div className="bg-[#FAFAFA] rounded-xl border border-[#E4E4E7] p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h4 className="font-bold text-sm text-[#111111]">
+            {topicStatus === 'completed' ? '🎉 Topic Completed!' : 'Finished studying this curriculum path?'}
+          </h4>
+          <p className="text-xs text-[#71717A] mt-0.5">
+            {topicStatus === 'completed'
+              ? 'Your topic mastery is recorded in your profile and reflected on the mentor administration command center.'
+              : 'Mark this topic as complete to update your mastery metrics and report your progress to mentors.'}
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={handleToggleTopicComplete}
+          disabled={updatingTopic}
+          className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-xs font-bold transition-all cursor-pointer shrink-0 shadow-xs ${
+            topicStatus === 'completed'
+              ? 'bg-[#111111] hover:bg-[#262626] text-white'
+              : 'bg-[#F9C321] hover:bg-[#E5B01D] text-[#111111]'
+          }`}
+        >
+          {topicStatus === 'completed' ? (
+            <>
+              <Check className="w-4 h-4 text-[#F9C321] stroke-[3]" />
+              <span>Mark as In Progress</span>
+            </>
+          ) : (
+            <>
+              <Check className="w-4 h-4 text-[#111111] stroke-[3]" />
+              <span>Mark as Complete</span>
+            </>
+          )}
+        </button>
       </div>
     </div>
   );

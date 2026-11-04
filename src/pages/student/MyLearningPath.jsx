@@ -20,6 +20,7 @@ export default function MyLearningPath({ onSelectTopic }) {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
   const [difficultyFilter, setDifficultyFilter] = useState('all');
+  const [updatingTopicId, setUpdatingTopicId] = useState(null);
 
   const fetchData = async () => {
     if (!profile?.id) return;
@@ -42,7 +43,47 @@ export default function MyLearningPath({ onSelectTopic }) {
     setCurriculum(null);
     setProgressData(null);
     fetchData();
+
+    const handleProgressUpdated = () => {
+      fetchData();
+    };
+
+    window.addEventListener('beacon:progress-updated', handleProgressUpdated);
+    return () => {
+      window.removeEventListener('beacon:progress-updated', handleProgressUpdated);
+    };
   }, [profile?.id]);
+
+  const handleToggleTopic = async (topicId, currentStatus) => {
+    const newStatus = currentStatus === 'completed' ? 'in_progress' : 'completed';
+    try {
+      setUpdatingTopicId(topicId);
+      await api.updateTopicStatus(
+        topicId,
+        newStatus,
+        newStatus === 'completed' ? 'Marked complete from Learning Path' : 'Reopened from Learning Path'
+      );
+      setProgressData((prev) => {
+        if (!prev) return prev;
+        const nextList = [...(prev.topicProgress || [])];
+        const idx = nextList.findIndex((tp) => tp.topic_id === topicId);
+        if (idx >= 0) {
+          nextList[idx] = { ...nextList[idx], status: newStatus };
+        } else {
+          nextList.push({ topic_id: topicId, status: newStatus });
+        }
+        return { ...prev, topicProgress: nextList };
+      });
+
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('beacon:progress-updated'));
+      }
+    } catch (err) {
+      alert(`Error updating topic status: ${err.message}`);
+    } finally {
+      setUpdatingTopicId(null);
+    }
+  };
 
   if (loading || !curriculum || !progressData) {
     return (
@@ -289,20 +330,35 @@ export default function MyLearningPath({ onSelectTopic }) {
                         )}
                       </div>
 
-                      {/* Card Footer: Start / Review Module button */}
-                      <div className="pt-3 border-t border-[#E4E4E7] flex items-center justify-between">
-                        <span className="text-[11px] text-[#71717A]">
-                          {status === 'completed'
-                            ? 'Project Completed'
-                            : topic.suggested_project
-                            ? 'Project Required'
-                            : 'Curriculum Unit'}
-                        </span>
+                      {/* Card Footer: Mark Complete & Start Module actions */}
+                      <div className="pt-3 border-t border-[#E4E4E7] flex flex-wrap items-center justify-between gap-2">
+                        <button
+                          type="button"
+                          disabled={updatingTopicId === topic.id}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleToggleTopic(topic.id, status);
+                          }}
+                          className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold border transition-all cursor-pointer ${
+                            status === 'completed'
+                              ? 'bg-[#111111] text-[#F9C321] border-[#111111] hover:bg-[#262626]'
+                              : 'bg-white text-[#52525B] border-[#E4E4E7] hover:border-[#111111] hover:text-[#111111]'
+                          }`}
+                          title={status === 'completed' ? 'Click to mark as in progress' : 'Click to mark as complete'}
+                        >
+                          {updatingTopicId === topic.id ? (
+                            <div className="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
+                          ) : (
+                            <Check className={`w-3.5 h-3.5 stroke-[3] ${status === 'completed' ? 'text-[#F9C321]' : 'text-[#71717A]'}`} />
+                          )}
+                          <span>{status === 'completed' ? 'Completed' : 'Mark as Complete'}</span>
+                        </button>
+
                         <button
                           onClick={() => onSelectTopic(topic.id)}
                           className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                             status === 'completed'
-                              ? 'bg-[#111111] text-white hover:bg-[#262626]'
+                              ? 'bg-[#F4F4F5] text-[#111111] hover:bg-[#E4E4E7]'
                               : 'bg-[#F9C321] text-[#111111] hover:bg-[#E5B01D]'
                           }`}
                         >

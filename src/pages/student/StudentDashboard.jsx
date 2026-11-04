@@ -53,6 +53,15 @@ export default function StudentDashboard({ onNavigateToTopic, onNavigateTab }) {
     setProjects([]);
     setCurriculum(null);
     loadDashboardData();
+
+    const handleProgressUpdated = () => {
+      loadDashboardData();
+    };
+
+    window.addEventListener('beacon:progress-updated', handleProgressUpdated);
+    return () => {
+      window.removeEventListener('beacon:progress-updated', handleProgressUpdated);
+    };
   }, [profile?.id, profile?.current_year, profile?.track_id]);
 
   const handleStartModule = async (topicId, currentStatus) => {
@@ -419,7 +428,7 @@ export default function StudentDashboard({ onNavigateToTopic, onNavigateTab }) {
                       {isDone ? (
                         <span className="text-[11px] font-semibold text-[#111111] bg-[#F4F4F5] px-2 py-0.5 rounded border border-[#E4E4E7] flex items-center gap-1">
                           <Check className="w-3 h-3 stroke-[3]" />
-                          <span>Project Done</span>
+                          <span>Module Completed</span>
                         </span>
                       ) : topic.project ? (
                         <button
